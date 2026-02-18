@@ -68,21 +68,35 @@ cd "$PROJECT_DIR"
 # Clean previous build
 rm -rf "$BUILD_DIR"
 
-# Build release
+# Build release (without code signing — we sign manually after to avoid Sparkle framework conflicts)
 xcodebuild \
     -scheme "$SCHEME" \
     -configuration Release \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
     -destination "platform=macOS" \
     CONFIGURATION_BUILD_DIR="$BUILD_DIR/Release" \
-    CODE_SIGN_IDENTITY="SuperWhisper Developer" \
+    CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
     clean build 2>&1 | tail -5
 
 if [ ! -d "$APP_PATH" ]; then
     echo -e "${RED}❌ Build failed — ${APP_PATH} not found${NC}"
     exit 1
 fi
-echo -e "   ${GREEN}✅ Build successful!${NC}"
+
+# Sign with SuperWhisper Developer certificate + entitlements
+echo -e "   ${YELLOW}🔐 Signing with certificate...${NC}"
+xattr -rc "$APP_PATH" 2>/dev/null
+CERT_SHA=$(security find-identity -v -p codesigning | grep "SuperWhisper Developer" | head -1 | awk '{print $2}')
+if [ -z "$CERT_SHA" ]; then
+    echo -e "${RED}❌ 'SuperWhisper Developer' certificate not found. Run scripts/setup-signing.sh first.${NC}"
+    exit 1
+fi
+codesign --force --deep --sign "$CERT_SHA" \
+    --entitlements "$PROJECT_DIR/SuperWhisper/SuperWhisper.entitlements" \
+    --options runtime \
+    "$APP_PATH" 2>&1
+
+echo -e "   ${GREEN}✅ Build signed with SuperWhisper Developer certificate!${NC}"
 
 # ─── Step 3: Create DMG ───────────────────────────────────────
 echo -e "\n${YELLOW}📦 Step 3: Creating DMG...${NC}"
