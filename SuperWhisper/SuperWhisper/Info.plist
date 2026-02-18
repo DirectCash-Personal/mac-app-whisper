@@ -13,9 +13,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>1.0.2</string>
 	<key>CFBundleVersion</key>
-	<string>202602172346</string>
+	<string>202602180012</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>
@@ -28,9 +28,9 @@
 	<true/>
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/DirectCash-Personal/mac-app-whisper/dev/SuperWhisper/appcast.xml</string>
-	<key>SUScheduledCheckInterval</key>
-	<integer>86400</integer>
 	<key>SUPublicEDKey</key>
 	<string>QZ2LGfLwJhjexDDP0CCpj07STBA/pE3NlMZmP5NRatU=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>
