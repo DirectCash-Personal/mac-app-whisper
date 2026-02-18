@@ -55,3 +55,8 @@ Packages/
 *.profraw
 Thumbs.db
 *.app
+
+# ─── Sparkle Signing Keys ─────────────────────────────
+sparkle_private_key
+*.pem
+eddsa_private_key

@@ -4,6 +4,7 @@ import SwiftUI
 /// Matches Stitch "General Settings - SuperWhisper" screen.
 struct GeneralSettingsView: View {
     @EnvironmentObject var settingsService: SettingsService
+    @StateObject private var updateService = UpdateService()
     @State private var apiKeyInput: String = ""
     @State private var isTestingKey: Bool = false
     @State private var keyTestResult: KeyTestResult?
@@ -183,6 +184,74 @@ struct GeneralSettingsView: View {
                             icon: "arrow.right.circle",
                             isOn: $settingsService.launchAtLogin
                         )
+                    }
+                }
+
+                // Updates Section
+                SectionCard(title: "Updates", icon: "arrow.triangle.2.circlepath") {
+                    VStack(spacing: AppSpacing.sm) {
+                        Text("Control how the app checks for new versions.")
+                            .font(AppTypography.caption)
+                            .foregroundColor(AppColors.textTertiary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Divider().opacity(0.2)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                                Text("Automatically check for updates")
+                                    .font(AppTypography.bodyMedium)
+                                    .foregroundColor(AppColors.textPrimary)
+                                Text("Check once every 24 hours in the background")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.textTertiary)
+                            }
+
+                            Spacer()
+
+                            Toggle("", isOn: Binding(
+                                get: { updateService.automaticallyChecksForUpdates },
+                                set: { updateService.automaticallyChecksForUpdates = $0 }
+                            ))
+                            .toggleStyle(.switch)
+                            .tint(AppColors.accent)
+                        }
+
+                        Divider().opacity(0.2)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                                Text("Current version: \(UpdateService.currentVersion)")
+                                    .font(AppTypography.bodyMedium)
+                                    .foregroundColor(AppColors.textPrimary)
+                                Text("Build \(UpdateService.currentBuild)")
+                                    .font(AppTypography.caption)
+                                    .foregroundColor(AppColors.textTertiary)
+                            }
+
+                            Spacer()
+
+                            Button(action: {
+                                updateService.checkForUpdates()
+                            }) {
+                                HStack(spacing: AppSpacing.xs) {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 11))
+                                    Text("Check Now")
+                                        .font(AppTypography.captionMedium)
+                                }
+                                .foregroundColor(AppColors.accent)
+                                .padding(.horizontal, AppSpacing.md)
+                                .padding(.vertical, AppSpacing.sm)
+                                .background(
+                                    RoundedRectangle(cornerRadius: AppRadius.md)
+                                        .fill(AppColors.accent.opacity(0.15))
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(!updateService.canCheckForUpdates)
+                            .opacity(updateService.canCheckForUpdates ? 1.0 : 0.5)
+                        }
                     }
                 }
 

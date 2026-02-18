@@ -24,5 +24,11 @@
     <string>SuperWhisper needs microphone access to capture your voice for transcription.</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2025 SuperWhisper. All rights reserved.</string>
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/DirectCash-Personal/mac-app-whisper/dev/SuperWhisper/appcast.xml</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
 </dict>
 </plist>

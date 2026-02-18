@@ -7,6 +7,11 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.0.0"
+
 settings:
   base:
     SWIFT_VERSION: "5.9"
@@ -29,6 +34,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "Info.plist"
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         INFOPLIST_FILE: SuperWhisper/Info.plist

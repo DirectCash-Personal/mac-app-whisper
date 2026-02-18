@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 import Carbon.HIToolbox
 import AVFoundation
+import Sparkle
 
 /// AppDelegate handles global hotkey registration, the floating overlay panel,
 /// and the menu bar status item. The app runs as a menu bar app (no dock icon).
@@ -16,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var historyService: TranscriptionHistoryService?
     private var statusItem: NSStatusItem?
     private var settingsWindowController: NSWindowController?
+    private let updateService = UpdateService()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("🚀 SuperWhisper launching...")
@@ -76,6 +78,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Pre-request microphone permission at launch
         requestMicrophoneIfNeeded()
+
+        // Start Sparkle auto-updater
+        updateService.startUpdater()
 
         print("✅ SuperWhisper ready!")
     }
@@ -140,6 +145,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        let updateItem = NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "u")
+        updateItem.target = self
+        menu.addItem(updateItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(title: "Quit SuperWhisper", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -184,6 +195,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.settingsWindowController = controller
         controller.showWindow(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func checkForUpdates() {
+        updateService.checkForUpdates()
     }
 
     @objc private func quitApp() {
