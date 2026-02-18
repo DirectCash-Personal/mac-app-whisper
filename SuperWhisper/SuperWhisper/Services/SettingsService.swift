@@ -1,5 +1,6 @@
 import Foundation
 import Carbon.HIToolbox
+import ServiceManagement
 
 /// Service handling UserDefaults settings and API key storage.
 /// API key is stored in UserDefaults with Base64 encoding (no Keychain popups).
@@ -17,6 +18,7 @@ class SettingsService: ObservableObject {
         static let hotkeyModifiers = "SW_HotkeyModifiers"
         static let forceF5 = "SW_ForceF5DictationKey"
         static let customShortcutEnabled = "SW_CustomShortcutEnabled"
+        static let launchAtLogin = "SW_LaunchAtLogin"
         static let apiKey = "SW_APIKey_Encoded"
     }
 
@@ -48,6 +50,13 @@ class SettingsService: ObservableObject {
 
     @Published var customShortcutEnabled: Bool {
         didSet { defaults.set(customShortcutEnabled, forKey: Keys.customShortcutEnabled) }
+    }
+
+    @Published var launchAtLogin: Bool {
+        didSet {
+            defaults.set(launchAtLogin, forKey: Keys.launchAtLogin)
+            updateLoginItem()
+        }
     }
 
     var hotkeyKeyCode: UInt32 {
@@ -103,6 +112,15 @@ class SettingsService: ObservableObject {
             defaults.set(2, forKey: Keys.hotkeyKeyCode)  // D
             defaults.set(Int(controlKey), forKey: Keys.hotkeyModifiers)  // Control
         }
+
+        // Default: Launch at Login ON
+        if defaults.object(forKey: Keys.launchAtLogin) == nil {
+            defaults.set(true, forKey: Keys.launchAtLogin)
+        }
+        self.launchAtLogin = defaults.bool(forKey: Keys.launchAtLogin)
+
+        // Apply launch-at-login state on init
+        updateLoginItem()
     }
 
     // MARK: - API Key (UserDefaults with Base64 encoding)
@@ -151,5 +169,23 @@ class SettingsService: ObservableObject {
         hotkeyModifiers = UInt32(controlKey)  // Control
         forceF5DictationKey = true
         customShortcutEnabled = true
+        launchAtLogin = true
+    }
+
+    // MARK: - Launch at Login (SMAppService)
+
+    private func updateLoginItem() {
+        let service = SMAppService.mainApp
+        do {
+            if launchAtLogin {
+                try service.register()
+                print("✅ Launch at Login: registered")
+            } else {
+                try service.unregister()
+                print("✅ Launch at Login: unregistered")
+            }
+        } catch {
+            print("⚠️ Launch at Login error: \(error.localizedDescription)")
+        }
     }
 }
