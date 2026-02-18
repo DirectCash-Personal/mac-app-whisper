@@ -54,3 +54,4 @@ Packages/
 *.tmp
 *.profraw
 Thumbs.db
+*.app
