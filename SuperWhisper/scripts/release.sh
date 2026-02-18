@@ -75,7 +75,7 @@ xcodebuild \
     -derivedDataPath "$BUILD_DIR/DerivedData" \
     -destination "platform=macOS" \
     CONFIGURATION_BUILD_DIR="$BUILD_DIR/Release" \
-    CODE_SIGN_IDENTITY="-" \
+    CODE_SIGN_IDENTITY="SuperWhisper Developer" \
     clean build 2>&1 | tail -5
 
 if [ ! -d "$APP_PATH" ]; then
