@@ -30,5 +30,7 @@
 	<string>https://raw.githubusercontent.com/DirectCash-Personal/mac-app-whisper/dev/SuperWhisper/appcast.xml</string>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
+	<key>SUPublicEDKey</key>
+	<string>QZ2LGfLwJhjexDDP0CCpj07STBA/pE3NlMZmP5NRatU=</string>
 </dict>
 </plist>
