@@ -1,0 +1,55 @@
+# ─── macOS ────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ─── Xcode ────────────────────────────────────────────
+## User-specific settings (NEVER commit these)
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+
+## Build products
+build/
+DerivedData/
+*.build/
+
+## Xcode workspace settings
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
+## Index store
+IndexStoreDB/
+Package.resolved
+
+# ─── Swift Package Manager ────────────────────────────
+.build/
+.swiftpm/
+Packages/
+
+# ─── Code signing ─────────────────────────────────────
+*.mobileprovision
+*.p12
+*.cer
+
+# ─── Archives & Distribution ─────────────────────────
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+*.dmg
+
+# ─── IDE & Editors ────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Misc ─────────────────────────────────────────────
+*.log
+*.tmp
+Thumbs.db
