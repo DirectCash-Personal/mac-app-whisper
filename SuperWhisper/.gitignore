@@ -52,4 +52,5 @@ Packages/
 # ─── Misc ─────────────────────────────────────────────
 *.log
 *.tmp
+*.profraw
 Thumbs.db
