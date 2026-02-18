@@ -6,14 +6,14 @@
         <language>en</language>
         <item>
             <title>Version 1.0.2</title>
-            <pubDate>Tue, 18 Feb 2026 00:12:00 -0300</pubDate>
-            <sparkle:version>202602180012</sparkle:version>
+            <pubDate>Tue, 18 Feb 2026 00:28:00 -0300</pubDate>
+            <sparkle:version>202602180028</sparkle:version>
             <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <enclosure
                 url="https://github.com/DirectCash-Personal/mac-app-whisper/releases/download/v1.0.2/SuperWhisper-1.0.2.dmg"
-                sparkle:edSignature="8oMcIWY5mGj0sQEVEssHISzy2WBenK6RQVPyst/YDJYc9N4bvAF+botnrRwQtyXzX+cj2buPl1QBaE3XsPqIDw=="
-                length="4222646"
+                sparkle:edSignature="bynz9pgJnQj8k4awsQ4MDDO+vCa5rHSCJPUbd0JYWu0TU86fbQ2+DB2DGwZfR+gdvmZKi6+C9dQ8ROgBWMDUAg=="
+                length="3254566"
                 type="application/octet-stream" />
         </item>
     </channel>
