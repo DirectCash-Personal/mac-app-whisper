@@ -4,6 +4,16 @@
         <title>SuperWhisper Updates</title>
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
-        <!-- Items will be added here by the release script -->
+        <item>
+            <title>Version 1.0.1</title>
+            <pubDate>Tue, 17 Feb 2026 23:47:20 -0300</pubDate>
+            <sparkle:version>202602172346</sparkle:version>
+            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure
+                url="https://github.com/DirectCash-Personal/mac-app-whisper/releases/download/v1.0.1/SuperWhisper-1.0.1.dmg"
+                length="3248285"
+                type="application/octet-stream" />
+        </item>
     </channel>
 </rss>
