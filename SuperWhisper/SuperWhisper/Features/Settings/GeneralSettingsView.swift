@@ -167,6 +167,25 @@ struct GeneralSettingsView: View {
                     }
                 }
 
+                // Startup Section
+                SectionCard(title: "Startup", icon: "power") {
+                    VStack(spacing: AppSpacing.sm) {
+                        Text("Control how the app starts with your Mac.")
+                            .font(AppTypography.caption)
+                            .foregroundColor(AppColors.textTertiary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Divider().opacity(0.2)
+
+                        ToggleRow(
+                            "Launch at Login",
+                            description: "Automatically start SuperWhisper when you log in",
+                            icon: "arrow.right.circle",
+                            isOn: $settingsService.launchAtLogin
+                        )
+                    }
+                }
+
                 // Bottom padding so content isn't cut off
                 Spacer().frame(height: AppSpacing.xl)
             }
