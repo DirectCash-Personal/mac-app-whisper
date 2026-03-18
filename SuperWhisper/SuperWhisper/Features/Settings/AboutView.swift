@@ -24,7 +24,7 @@ struct AboutView: View {
                     .font(AppTypography.largeTitle)
                     .foregroundColor(AppColors.textPrimary)
 
-                Text("Pro v1.0.0 (Build 1)")
+                Text("Pro v\(UpdateService.currentVersion) (Build \(UpdateService.currentBuild))")
                     .font(AppTypography.caption)
                     .foregroundColor(AppColors.textTertiary)
             }

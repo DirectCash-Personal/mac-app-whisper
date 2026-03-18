@@ -4,6 +4,8 @@ import SwiftUI
 struct SettingsWindow: View {
     @EnvironmentObject var settingsService: SettingsService
     @EnvironmentObject var historyService: TranscriptionHistoryService
+    @EnvironmentObject var pendingService: PendingTranscriptionService
+    @EnvironmentObject var audioPersistence: AudioPersistenceService
 
     enum SettingsTab: String, CaseIterable {
         case general = "General"
@@ -21,6 +23,7 @@ struct SettingsWindow: View {
         }
     }
 
+    var initialTab: SettingsTab = .general
     @State private var selectedTab: SettingsTab = .general
 
     var body: some View {
@@ -60,6 +63,9 @@ struct SettingsWindow: View {
         }
         .frame(minWidth: 650, maxWidth: 700, minHeight: 550, maxHeight: 700)
         .environmentObject(settingsService)
+        .onAppear {
+            selectedTab = initialTab
+        }
     }
 }
 

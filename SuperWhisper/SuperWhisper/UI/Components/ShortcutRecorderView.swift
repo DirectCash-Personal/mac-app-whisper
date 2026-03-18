@@ -94,6 +94,10 @@ struct ShortcutRecorderView: View {
             }
             .animation(AppAnimation.standard, value: isRecording)
             .animation(AppAnimation.standard, value: liveModifiers.rawValue)
+            // H8: Clean up event monitors if view is dismissed during recording
+            .onDisappear {
+                stopMonitors()
+            }
 
             // Helper text
             Text(isRecording ? "Esc to cancel" : "Click to change")

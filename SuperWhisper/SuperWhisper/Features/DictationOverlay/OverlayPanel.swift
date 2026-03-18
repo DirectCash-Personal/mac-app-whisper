@@ -24,7 +24,6 @@ class OverlayPanel: NSPanel {
     }
 
     private func configure() {
-        // Panel behavior
         isFloatingPanel = true
         level = .floating
         isMovableByWindowBackground = true
@@ -33,21 +32,11 @@ class OverlayPanel: NSPanel {
         hasShadow = true
         hidesOnDeactivate = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
-
-        // Don't show in dock or window list
         isExcludedFromWindowsMenu = true
-
-        // Position: center horizontally, near bottom of screen
-        if let screen = NSScreen.main {
-            let screenFrame = screen.visibleFrame
-            let x = screenFrame.midX - frame.width / 2
-            let y = screenFrame.minY + 80
-            setFrame(NSRect(x: x, y: y, width: frame.width, height: frame.height), display: false)
-        }
+        repositionToScreen()
     }
 
     private func setupContent() {
-        // Visual effect (blur/vibrancy)
         let contentRect = NSRect(x: 0, y: 0, width: 380, height: 90)
         let visualEffect = NSVisualEffectView(frame: contentRect)
         visualEffect.material = NSVisualEffectView.Material.hudWindow
@@ -58,7 +47,6 @@ class OverlayPanel: NSPanel {
         visualEffect.layer?.masksToBounds = true
         visualEffect.autoresizingMask = [.width, .height]
 
-        // SwiftUI content
         let overlayContent = OverlayContentView()
             .environmentObject(appState)
             .environmentObject(settingsService)
@@ -67,7 +55,6 @@ class OverlayPanel: NSPanel {
         hostingView.frame = contentRect
         hostingView.autoresizingMask = [.width, .height]
 
-        // Layer hosting view on top of visual effect
         visualEffect.addSubview(hostingView)
         contentView_ = visualEffect
     }
@@ -77,24 +64,64 @@ class OverlayPanel: NSPanel {
         set { contentView = newValue }
     }
 
+    private func repositionToScreen() {
+        guard let screen = NSScreen.main else { return }
+        let screenFrame = screen.visibleFrame
+        let x = screenFrame.midX - frame.width / 2
+        let y = screenFrame.minY + 80
+        setFrame(NSRect(x: x, y: y, width: frame.width, height: frame.height), display: false)
+    }
+
+    // #1: Cancellable work item for hide retries
+    private var isAnimating = false
+    private var pendingHideWork: DispatchWorkItem?
+
     func showOverlay() {
-        // Animate in
+        // Cancel any pending hide retry
+        pendingHideWork?.cancel()
+        pendingHideWork = nil
+
+        guard !isAnimating else { return }
+        isAnimating = true
+
+        repositionToScreen()
+
         alphaValue = 0
         orderFrontRegardless()
-        NSAnimationContext.runAnimationGroup { context in
+        NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.25
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             animator().alphaValue = 1
-        }
+        }, completionHandler: { [weak self] in
+            self?.isAnimating = false
+        })
     }
 
     func hideOverlay() {
+        // Cancel any previous pending hide
+        pendingHideWork?.cancel()
+        pendingHideWork = nil
+
+        guard !isAnimating else {
+            // Schedule a single retry (cancellable, no recursion)
+            let work = DispatchWorkItem { [weak self] in
+                self?.pendingHideWork = nil
+                self?.isAnimating = false // Force reset after wait
+                self?.hideOverlay()
+            }
+            pendingHideWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: work)
+            return
+        }
+        isAnimating = true
+
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.25
             context.timingFunction = CAMediaTimingFunction(name: .easeIn)
             animator().alphaValue = 0
-        }, completionHandler: {
-            self.orderOut(nil)
+        }, completionHandler: { [weak self] in
+            self?.orderOut(nil)
+            self?.isAnimating = false
         })
     }
 }

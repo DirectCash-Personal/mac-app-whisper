@@ -7,15 +7,20 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.0.0"
+
 settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
-    CODE_SIGN_IDENTITY: "-"
-    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "SuperWhisper Developer"
+    CODE_SIGN_STYLE: Manual
     PRODUCT_BUNDLE_IDENTIFIER: com.superwhisper.app
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0.2"
+    CURRENT_PROJECT_VERSION: "202602180028"
     INFOPLIST_FILE: SuperWhisper/Info.plist
     CODE_SIGN_ENTITLEMENTS: SuperWhisper/SuperWhisper.entitlements
     ENABLE_HARDENED_RUNTIME: false
@@ -29,6 +34,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "Info.plist"
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         INFOPLIST_FILE: SuperWhisper/Info.plist
