@@ -39,8 +39,8 @@ class PasteService {
             return
         }
 
-        // Create Cmd+V key events
-        let source = CGEventSource(stateID: .hidSystemState)
+        // M4: Guard CGEventSource creation
+        guard let source = CGEventSource(stateID: .hidSystemState) else { return }
 
         // Key down: V (keycode 9) with Cmd modifier
         guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true) else { return }

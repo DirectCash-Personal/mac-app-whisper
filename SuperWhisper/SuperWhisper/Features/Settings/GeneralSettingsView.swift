@@ -10,6 +10,7 @@ struct GeneralSettingsView: View {
     @State private var keyTestResult: KeyTestResult?
     @State private var isKeySaved: Bool = false
     @State private var isEditing: Bool = false
+    @State private var testKeyTask: Task<Void, Never>?  // M7: Cancellable task
 
     enum KeyTestResult {
         case valid, invalid
@@ -264,15 +265,20 @@ struct GeneralSettingsView: View {
             apiKeyInput = settingsService.apiKey ?? ""
             isEditing = !settingsService.hasAPIKey
         }
+        .onDisappear {
+            testKeyTask?.cancel()
+        }
     }
 
+    // M7: Task is stored and cancelled on view disappear
     private func testAPIKey() {
         isTestingKey = true
         keyTestResult = nil
 
         let service = TranscriptionService(settingsService: settingsService)
-        Task {
+        testKeyTask = Task {
             let isValid = await service.testAPIKey(apiKeyInput)
+            guard !Task.isCancelled else { return }
             await MainActor.run {
                 isTestingKey = false
                 keyTestResult = isValid ? .valid : .invalid

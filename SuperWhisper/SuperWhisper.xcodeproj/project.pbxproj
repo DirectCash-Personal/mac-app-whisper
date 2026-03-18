@@ -10,6 +10,8 @@
 		018A9BFADEB4D922FD5D1BA1 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ECBEE61BD345623663AE9A8 /* WaveformView.swift */; };
 		1B6919AC5FAB250F5BD0AE94 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBC4EC8A161F18359D2B035D /* PermissionsView.swift */; };
 		1FD4D4747270CDFC5CF7021F /* UpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C7CAFC9B80F6B4FA0872C9E /* UpdateService.swift */; };
+		2640B540923171742F1D74E8 /* AudioCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C676303FC9ABFB49AD5FED30 /* AudioCompressionService.swift */; };
+		31DA57FFE821ADBECF79A02D /* AudioPersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F2D403890F8B3EAB7D8A15 /* AudioPersistenceService.swift */; };
 		321991D7EE5D89AB688245D8 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF776E3F07E079D3037926D /* ShortcutRecorderView.swift */; };
 		3545FA857029F4E519881F1D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA2074FA87F4AA86E6FBC26 /* AppDelegate.swift */; };
 		37AA43C7A4ABBFD854E712A3 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5CE84CBBF34309F3116CE1 /* GlassCard.swift */; };
@@ -28,6 +30,7 @@
 		8A4B03C19C1DD8EBEF5F73BC /* PasteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDDE3F8122451F181DFDAB7 /* PasteService.swift */; };
 		8AA1ED3B135A2798FD81ED7B /* AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB105C042963B038E50C9A4E /* AudioCaptureService.swift */; };
 		8C30495E7DF8151F397C8602 /* TranscriptionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F90713365ACB9D92B925BF52 /* TranscriptionServiceTests.swift */; };
+		966F53203CF681DD5A87A75D /* PendingTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00F02DD9DFDAF17F6D4EEB1 /* PendingTranscriptionService.swift */; };
 		99FAECB49F56178B2CAA6A8C /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AB2B73034041AE6E0985B5 /* HotkeyService.swift */; };
 		9A68C3C28AFFA4BC9E9810A1 /* DropdownField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76F662B9DDE22AA233689682 /* DropdownField.swift */; };
 		9E885A2AA3573384659F6B2E /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047DA9E2B598E31ADEC6EC58 /* MainWindowView.swift */; };
@@ -59,6 +62,7 @@
 		0767268471B082F4AD17E85E /* OverlayContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentView.swift; sourceTree = "<group>"; };
 		0A64F1C3D27D74911663C9D3 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		0F99DBB022F9949C21606F26 /* SuperWhisperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuperWhisperApp.swift; sourceTree = "<group>"; };
+		12F2D403890F8B3EAB7D8A15 /* AudioPersistenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPersistenceService.swift; sourceTree = "<group>"; };
 		3124CAA89A5698EA0AF6F286 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		34233DDCBA840CD385464BE6 /* SecureInputField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureInputField.swift; sourceTree = "<group>"; };
 		3AA2074FA87F4AA86E6FBC26 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -78,9 +82,11 @@
 		A2DEB7AB12FDE09C8C29A6D0 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		ABF742A8E6C09689DC3612D0 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		AD929264D6FE66B737ED4328 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		B00F02DD9DFDAF17F6D4EEB1 /* PendingTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingTranscriptionService.swift; sourceTree = "<group>"; };
 		B443FFC400B0A02471DEDC1F /* SuperWhisperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SuperWhisperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A32862973C34D393CE099E /* TranscriptionHistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionHistoryService.swift; sourceTree = "<group>"; };
 		B7AB2B73034041AE6E0985B5 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
+		C676303FC9ABFB49AD5FED30 /* AudioCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCompressionService.swift; sourceTree = "<group>"; };
 		CAC15817F02CEFD26123BA02 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		CC39D54A34DED31FEBBEDE38 /* SuperWhisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SuperWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD84728FDDBB4745E5E3A3E9 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
@@ -119,8 +125,11 @@
 			isa = PBXGroup;
 			children = (
 				FB105C042963B038E50C9A4E /* AudioCaptureService.swift */,
+				C676303FC9ABFB49AD5FED30 /* AudioCompressionService.swift */,
+				12F2D403890F8B3EAB7D8A15 /* AudioPersistenceService.swift */,
 				B7AB2B73034041AE6E0985B5 /* HotkeyService.swift */,
 				FBDDE3F8122451F181DFDAB7 /* PasteService.swift */,
+				B00F02DD9DFDAF17F6D4EEB1 /* PendingTranscriptionService.swift */,
 				EE67F2CD95347CD87BF75D11 /* PermissionsService.swift */,
 				54EF798381983CC437AAAB7D /* SettingsService.swift */,
 				B4A32862973C34D393CE099E /* TranscriptionHistoryService.swift */,
@@ -369,6 +378,8 @@
 				3545FA857029F4E519881F1D /* AppDelegate.swift in Sources */,
 				6FDFC8F8FCFB2064AA388F57 /* AppState.swift in Sources */,
 				8AA1ED3B135A2798FD81ED7B /* AudioCaptureService.swift in Sources */,
+				2640B540923171742F1D74E8 /* AudioCompressionService.swift in Sources */,
+				31DA57FFE821ADBECF79A02D /* AudioPersistenceService.swift in Sources */,
 				DBA1917AD102F5112B45AB4A /* DesignTokens.swift in Sources */,
 				9A68C3C28AFFA4BC9E9810A1 /* DropdownField.swift in Sources */,
 				DEEAA58C944D936EF6CB63ED /* GeneralSettingsView.swift in Sources */,
@@ -380,6 +391,7 @@
 				A9C654B7ED2182AEE49B0FF7 /* OverlayContentView.swift in Sources */,
 				C168F905481E347AC3DE6CD8 /* OverlayPanel.swift in Sources */,
 				8A4B03C19C1DD8EBEF5F73BC /* PasteService.swift in Sources */,
+				966F53203CF681DD5A87A75D /* PendingTranscriptionService.swift in Sources */,
 				742838E55D009DBDAC7A4178 /* PermissionsService.swift in Sources */,
 				1B6919AC5FAB250F5BD0AE94 /* PermissionsView.swift in Sources */,
 				C8C5C89A93A6DC85F568DB25 /* PrimaryButton.swift in Sources */,
@@ -455,7 +467,7 @@
 				CODE_SIGN_IDENTITY = "SuperWhisper Developer";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 202602172346;
+				CURRENT_PROJECT_VERSION = 202602180028;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -476,7 +488,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = SuperWhisper/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -582,7 +594,7 @@
 				CODE_SIGN_IDENTITY = "SuperWhisper Developer";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 202602172346;
+				CURRENT_PROJECT_VERSION = 202602180028;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -597,7 +609,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = SuperWhisper/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.superwhisper.app;

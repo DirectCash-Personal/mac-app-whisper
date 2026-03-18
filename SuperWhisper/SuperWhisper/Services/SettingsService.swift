@@ -6,6 +6,8 @@ import ServiceManagement
 /// API key is stored in UserDefaults with Base64 encoding (no Keychain popups).
 class SettingsService: ObservableObject {
     private let defaults = UserDefaults.standard
+    // M5: Serial queue for API key operations to prevent race conditions
+    private let apiKeyQueue = DispatchQueue(label: "com.superwhisper.apikey")
 
     // MARK: - Keys
     private enum Keys {
@@ -126,9 +128,9 @@ class SettingsService: ObservableObject {
     // MARK: - API Key (UserDefaults with Base64 encoding)
 
     var apiKey: String? {
-        get { readAPIKey() }
+        get { apiKeyQueue.sync { readAPIKey() } }
         set {
-            saveAPIKey(newValue)
+            apiKeyQueue.sync { saveAPIKey(newValue) }
             objectWillChange.send()
         }
     }

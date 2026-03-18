@@ -7,12 +7,14 @@ enum TranscriptionModel: String, CaseIterable, CustomStringConvertible, Codable 
     case whisper1 = "whisper-1"
     case gpt4oMiniTranscribe = "gpt-4o-mini-transcribe"
     case gpt4oTranscribe = "gpt-4o-transcribe"
+    case gpt4oTranscribeDiarize = "gpt-4o-transcribe-diarize"
 
     var description: String {
         switch self {
         case .whisper1: return "Whisper v1"
         case .gpt4oMiniTranscribe: return "GPT-4o Mini Transcribe"
         case .gpt4oTranscribe: return "GPT-4o Transcribe"
+        case .gpt4oTranscribeDiarize: return "GPT-4o Transcribe (Speakers)"
         }
     }
 
@@ -20,8 +22,13 @@ enum TranscriptionModel: String, CaseIterable, CustomStringConvertible, Codable 
     var jsonResponseOnly: Bool {
         switch self {
         case .whisper1: return false
-        case .gpt4oMiniTranscribe, .gpt4oTranscribe: return true
+        case .gpt4oMiniTranscribe, .gpt4oTranscribe, .gpt4oTranscribeDiarize: return true
         }
+    }
+
+    /// Whether this model requires chunking_strategy for audio > 30s.
+    var requiresChunkingStrategy: Bool {
+        self == .gpt4oTranscribeDiarize
     }
 }
 
@@ -67,6 +74,7 @@ enum TranscriptionError: LocalizedError {
     case serverError(Int, String)
     case invalidResponse
     case audioFileMissing
+    case fileTooLarge
     case timeout
 
     var errorDescription: String? {
@@ -77,6 +85,7 @@ enum TranscriptionError: LocalizedError {
         case .serverError(let code, let msg): return "Server error (\(code)): \(msg)"
         case .invalidResponse: return "Invalid response from server."
         case .audioFileMissing: return "Audio file not found."
+        case .fileTooLarge: return "Audio file exceeds 25 MB limit. Try a shorter recording."
         case .timeout: return "Request timed out. Please try again."
         }
     }

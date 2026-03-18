@@ -117,18 +117,28 @@ struct RecordingView: View {
     }
 }
 
-/// Processing state — spinner + "Transcribing…".
+/// Processing state — spinner + "Transcribing…" (shows retry info transparently).
 /// Matches Stitch "Processing Overlay" screen.
 struct ProcessingView: View {
+    @EnvironmentObject var appState: AppStateManager
+
     var body: some View {
         HStack(spacing: AppSpacing.md) {
             ProgressView()
                 .controlSize(.regular)
                 .tint(AppColors.accent)
 
-            Text("Transcribing…")
-                .font(AppTypography.headline)
-                .foregroundColor(AppColors.textPrimary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Transcribing…")
+                    .font(AppTypography.headline)
+                    .foregroundColor(AppColors.textPrimary)
+
+                if let retryInfo = appState.retryInfo {
+                    Text(retryInfo)
+                        .font(AppTypography.caption)
+                        .foregroundColor(AppColors.textTertiary)
+                }
+            }
         }
     }
 }
@@ -150,8 +160,10 @@ struct SuccessView: View {
 }
 
 /// Error overlay state — auto-dismisses after 5 seconds, with a close button.
+/// H9: Uses Task for cancellable auto-dismiss (prevents stale timer firing).
 struct ErrorOverlayView: View {
     let message: String
+    @State private var autoDismissTask: Task<Void, Never>?
 
     var body: some View {
         HStack(spacing: AppSpacing.sm) {
@@ -167,6 +179,7 @@ struct ErrorOverlayView: View {
             Spacer()
 
             Button(action: {
+                autoDismissTask?.cancel()
                 NotificationCenter.default.post(name: .dismissOverlay, object: nil)
             }) {
                 Image(systemName: "xmark.circle.fill")
@@ -177,10 +190,15 @@ struct ErrorOverlayView: View {
         }
         .padding(.horizontal, AppSpacing.lg)
         .onAppear {
-            // Auto-dismiss after 5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            autoDismissTask?.cancel()
+            autoDismissTask = Task {
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                guard !Task.isCancelled else { return }
                 NotificationCenter.default.post(name: .dismissOverlay, object: nil)
             }
+        }
+        .onDisappear {
+            autoDismissTask?.cancel()
         }
     }
 }

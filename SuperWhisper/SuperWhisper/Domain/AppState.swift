@@ -28,14 +28,19 @@ enum DictationState: Equatable {
 }
 
 /// Observable app state manager used as the single source of truth.
+/// H1: All state transitions must happen on main thread (enforced by dispatchPrecondition).
 class AppStateManager: ObservableObject {
     @Published var currentState: DictationState = .idle
     @Published var waveformAmplitudes: [Float] = []
     @Published var recordingDuration: TimeInterval = 0
     @Published var transcribedText: String = ""
     @Published var errorMessage: String?
+    @Published var retryInfo: String?
 
     func transition(to newState: DictationState) {
+        // H1: Ensure main thread — @Published properties are not thread-safe
+        dispatchPrecondition(condition: .onQueue(.main))
+
         // Validate transitions
         let valid: Bool
         switch (currentState, newState) {
@@ -44,10 +49,12 @@ class AppStateManager: ObservableObject {
              (.idle, .error),
              (.recording, .processing),
              (.recording, .idle),        // cancel
+             (.recording, .error),       // mid-recording error (mic disconnect)
              (.processing, .success),
              (.processing, .error),
              (.success, .idle),
              (.error, .idle),
+             (.error, .error),           // H2: Allow error→error for chained errors
              (.permissionsNeeded, .idle),
              (.permissionsNeeded, .recording):
             valid = true
@@ -56,7 +63,7 @@ class AppStateManager: ObservableObject {
         }
 
         guard valid else {
-            print("⚠️ Invalid state transition: \(currentState) → \(newState)")
+            print("Invalid state transition: \(currentState) → \(newState)")
             return
         }
 
@@ -66,6 +73,7 @@ class AppStateManager: ObservableObject {
             waveformAmplitudes = []
             recordingDuration = 0
             errorMessage = nil
+            retryInfo = nil
         case .recording:
             transcribedText = ""
             waveformAmplitudes = []
