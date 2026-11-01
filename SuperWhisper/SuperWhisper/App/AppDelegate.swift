@@ -135,9 +135,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
     }
 
     @objc private func handleDismissOverlay() {
+        // Dismiss only closes a notice (error or success). A late auto-dismiss must not end a new take in progress,
+        // now that processing -> idle is a valid transition (empty transcription).
+        guard let appState = appState else { return }
+        switch appState.currentState {
+        case .error, .success, .permissionsNeeded, .idle: break
+        default: return
+        }
         overlayPanel?.hideOverlay()
-        if appState?.currentState != .idle {
-            appState?.transition(to: .idle)
+        if appState.currentState != .idle {
+            appState.transition(to: .idle)
         }
     }
 
