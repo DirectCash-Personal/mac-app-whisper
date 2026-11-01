@@ -179,7 +179,7 @@ struct GeneralSettingsView: View {
                                 }
                             }
                             .labelsHidden()
-                            .frame(maxWidth: 280)
+                            .fixedSize()
                         }
                         .padding(.vertical, AppSpacing.xs)
                     }

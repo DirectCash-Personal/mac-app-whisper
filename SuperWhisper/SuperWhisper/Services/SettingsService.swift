@@ -198,6 +198,8 @@ class SettingsService: ObservableObject {
     // MARK: - Launch at Login (SMAppService)
 
     private func updateLoginItem() {
+        // Under XCTest the "main app" is the xctest agent: registering it adds xctest as a real login item.
+        guard NSClassFromString("XCTestCase") == nil else { return }
         let service = SMAppService.mainApp
         do {
             if launchAtLogin {
