@@ -27,9 +27,9 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/DirectCash-Personal/mac-app-whisper/dev/SuperWhisper/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/DirectCash-Personal/mac-app-whisper/main/SuperWhisper/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>QZ2LGfLwJhjexDDP0CCpj07STBA/pE3NlMZmP5NRatU=</string>
+	<string>jPU0sGxGPCFZyeMBnq0TsrPGDHRlAXWocRHzn4IyRwA=</string>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 </dict>

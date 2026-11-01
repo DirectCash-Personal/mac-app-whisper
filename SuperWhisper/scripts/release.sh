@@ -140,7 +140,12 @@ echo -e "\n${YELLOW}📡 Step 4: Generating appcast.xml...${NC}"
 # Check if Sparkle's generate_appcast is available
 SPARKLE_BIN=""
 # Check common locations
-if command -v generate_appcast &> /dev/null; then
+# EdDSA key lives in the Keychain under the "superwhisper" account (backup: ~/.config/superwhisper/sparkle-eddsa-chave-privada).
+# The original key was lost in 2026: 1.0.x installs cannot verify updates and need one manual install of 1.1.2+.
+SPARKLE_KEY_ACCOUNT="superwhisper"
+if [ -x "$HOME/.local/share/superwhisper-sparkle/bin/generate_appcast" ]; then
+    SPARKLE_BIN="$HOME/.local/share/superwhisper-sparkle/bin/generate_appcast"
+elif command -v generate_appcast &> /dev/null; then
     SPARKLE_BIN="generate_appcast"
 elif [ -f "$BUILD_DIR/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_appcast" ]; then
     SPARKLE_BIN="$BUILD_DIR/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_appcast"
@@ -151,7 +156,7 @@ fi
 if [ -n "$SPARKLE_BIN" ] && [ -f "$SPARKLE_BIN" ]; then
     # generate_appcast will scan the build directory for DMGs and create/update appcast.xml
     # It uses the EdDSA key from the Keychain or environment variable
-    "$SPARKLE_BIN" "$BUILD_DIR" --download-url-prefix "https://github.com/DirectCash-Personal/mac-app-whisper/releases/download/v${VERSION}/" -o "$APPCAST_PATH"
+    "$SPARKLE_BIN" --account "$SPARKLE_KEY_ACCOUNT" "$BUILD_DIR" --download-url-prefix "https://github.com/DirectCash-Personal/mac-app-whisper/releases/download/v${VERSION}/" -o "$APPCAST_PATH"
     echo -e "   ${GREEN}✅ appcast.xml generated with Sparkle signatures${NC}"
 else
     echo -e "   ${YELLOW}⚠️  generate_appcast not found. Generating appcast manually...${NC}"
