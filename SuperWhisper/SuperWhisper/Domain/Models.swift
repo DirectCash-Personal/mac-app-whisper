@@ -58,7 +58,7 @@ enum TranscriptionVocabulary {
     ]
 
     static func terms(from commaSeparatedTerms: String) -> [String] {
-        commaSeparatedTerms.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        commaSeparatedTerms.split(whereSeparator: { $0 == "," || $0.isNewline }).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
     }
 
     static func promptHint(for terms: [String]) -> String {

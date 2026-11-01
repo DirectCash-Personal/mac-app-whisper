@@ -132,5 +132,7 @@ final class SettingsServiceTests: XCTestCase {
     func testVocabularyTermsAreTrimmedAndPersisted() {
         service.vocabularyTerms = " Kestra ,, NC Caps , "
         XCTAssertEqual(SettingsService().vocabularyTermList, ["Kestra", "NC Caps"])
+        service.vocabularyTerms = "Kestra\nJev, NC Caps"
+        XCTAssertEqual(service.vocabularyTermList, ["Kestra", "Jev", "NC Caps"])
     }
 }

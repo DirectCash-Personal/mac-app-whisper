@@ -19,6 +19,10 @@ final class MicrophoneGuardService: ObservableObject {
     /// After a device connects or disconnects, macOS default-input switches arrive in a burst.
     private let settleSeconds: CFAbsoluteTime = 3.0
     private let newDeviceWindowSeconds: Double = 10.0
+    /// macOS can pick the blocked device again a few seconds after the revert (AirPods finishing their connection):
+    /// within this window that is still a hijack, not the user's choice. Picking it in the menu or settings always works.
+    private let blockedDeviceWindowSeconds: CFAbsoluteTime = 30.0
+    private var lastBlockTimeByInputUID: [String: CFAbsoluteTime] = [:]
 
     private var knownInputUIDs = Set<String>()
     private var lastDeviceListChangeTime: CFAbsoluteTime = 0
@@ -103,9 +107,14 @@ final class MicrophoneGuardService: ObservableObject {
 
     private func handleDefaultInputChanged() {
         guard let newInput = CoreAudioInputDevices.currentDefaultInput(), newInput.deviceUID != currentInputUID else { return }
+        let now = CFAbsoluteTimeGetCurrent()
         let isNewDevice = !knownInputUIDs.contains(newInput.deviceUID)
-        knownInputUIDs.formUnion(CoreAudioInputDevices.listInputDevices().map(\.deviceUID))
-        let isSettled = CFAbsoluteTimeGetCurrent() - lastDeviceListChangeTime >= settleSeconds
+        let presentInputUIDs = Set(CoreAudioInputDevices.listInputDevices().map(\.deviceUID))
+        knownInputUIDs.formUnion(presentInputUIDs)
+        // The previous input disappeared: macOS is falling back, even if the device-list notification has not arrived yet.
+        let previousInputDisappeared = !currentInputUID.isEmpty && !presentInputUIDs.contains(currentInputUID)
+        let wasBlockedRecently = now - (lastBlockTimeByInputUID[newInput.deviceUID] ?? -.infinity) < blockedDeviceWindowSeconds
+        let isSettled = now - lastDeviceListChangeTime >= settleSeconds && !previousInputDisappeared && !wasBlockedRecently
 
         if isSettled && !isNewDevice {
             preferredInputUID = newInput.deviceUID
@@ -139,6 +148,7 @@ final class MicrophoneGuardService: ObservableObject {
         guard let targetInput, targetInput.deviceUID != blockedInput.deviceUID,
               CoreAudioInputDevices.setDefaultInput(targetInput) else { return false }
         currentInputUID = targetInput.deviceUID
+        lastBlockTimeByInputUID[blockedInput.deviceUID] = now
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm"
         lastBlockedSummary = "\(blockedInput.deviceName) at \(timeFormatter.string(from: Date()))"

@@ -20,9 +20,10 @@ enum TranscriptionTermCorrectionService {
                 "\(text.substring(with: match.range(at: 1))) Loot"
             }
         }
-        // Kestra heard as "Castro" (a common surname): only after agente/gerente/chat/grupo or before contas/BM/campanha/cartão.
+        // Kestra heard as "Castro" (a common surname): only right after agente/gerente ("agente gerente Castro") or before
+        // contas/BM/campanha/cartão. "gerente do Castro" and "grupo Castro" stay.
         correctedText = replace(
-            #"\b(agente(?:\s+gerente)?|gerente|chat|grupo)(\s+(?:da|do|de)?\s*)(?:Castro|Kess[Tt]?[Rr]?a|Quess[Tt]?[Rr]?a|Questa)\b"#
+            #"\b(agente(?:\s+gerente)?|gerente)(\s+)(?:Castro|Kess[Tt]?[Rr]?a|Quess[Tt]?[Rr]?a|Questa)\b"#
             + #"|\b(?:Castro|Kess[Tt]?[Rr]?a|Quess[Tt]?[Rr]?a|Questa)(?=\s+(?:contas?|BMs?|campanhas?|cart[ãa]o|cart[õo]es)\b)"#,
             in: correctedText, caseInsensitive: true) { match, text in
             guard match.range(at: 1).location != NSNotFound else { return "Kestra" }
@@ -55,7 +56,7 @@ enum TranscriptionTermCorrectionService {
         let spokenDigitAlternatives = "(?:" + spokenDigits.keys.joined(separator: "|") + ")"
         let pattern = #"\b(PR|pull request)\s+("# + spokenDigitAlternatives + #"(?:\s+"# + spokenDigitAlternatives + #"){1,5})\b"#
         return replace(pattern, in: text, caseInsensitive: true) { match, nsText in
-            var digitWords = nsText.substring(with: match.range(at: 2)).split(separator: " ").map(String.init)
+            var digitWords = nsText.substring(with: match.range(at: 2)).split(whereSeparator: \.isWhitespace).map(String.init)
             var trailingArticle = ""
             let afterMatch = nsText.substring(from: match.range.location + match.range.length)
             if digitWords.last?.lowercased() == "um", afterMatch.range(of: #"^\s+\w"#, options: .regularExpression) != nil {
@@ -63,7 +64,9 @@ enum TranscriptionTermCorrectionService {
                 digitWords.removeLast()
             }
             guard digitWords.count >= 2 else { return nsText.substring(with: match.range) }
-            let digits = digitWords.compactMap { spokenDigits[$0.lowercased()] }.joined()
+            let digitValues = digitWords.compactMap { spokenDigits[$0.lowercased()] }
+            guard digitValues.count == digitWords.count else { return nsText.substring(with: match.range) }
+            let digits = digitValues.joined()
             return "\(nsText.substring(with: match.range(at: 1))) \(digits)\(trailingArticle)"
         }
     }

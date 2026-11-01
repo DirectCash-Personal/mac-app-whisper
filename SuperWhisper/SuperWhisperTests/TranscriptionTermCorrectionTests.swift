@@ -16,6 +16,8 @@ final class TranscriptionTermCorrectionTests: XCTestCase {
     func testKestraHeardAsCastroOnlyWithNeighbor() {
         XCTAssertEqual(corrected("manda pro agente gerente Castro"), "manda pro agente gerente Kestra")
         XCTAssertEqual(corrected("o Castro ligou"), "o Castro ligou")
+        XCTAssertEqual(corrected("falei com o gerente do Castro ontem"), "falei com o gerente do Castro ontem")
+        XCTAssertEqual(corrected("o Castro contas estão paradas"), "o Kestra contas estão paradas")
     }
 
     func testNcCapsAndLootRush() {
@@ -30,6 +32,7 @@ final class TranscriptionTermCorrectionTests: XCTestCase {
         XCTAssertEqual(corrected("o Mark II iOS"), "o Mark 2 iOS")
         XCTAssertEqual(corrected("revisa o PR um dois zero nove"), "revisa o PR 1209")
         XCTAssertEqual(corrected("o PR dois um momento"), "o PR dois um momento")
+        XCTAssertEqual(corrected("PR um dois\ntrês"), "PR 123")
     }
 
     func testClaudeCode() {

@@ -233,7 +233,7 @@ struct GeneralSettingsView: View {
                                     .font(AppTypography.bodyMedium)
                                     .foregroundColor(AppColors.textPrimary)
                                     .help("Check once every 24 hours in the background")
-                                            }
+                            }
 
                             Spacer()
 
