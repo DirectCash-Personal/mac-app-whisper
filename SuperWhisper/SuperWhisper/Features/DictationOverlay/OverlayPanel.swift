@@ -30,6 +30,8 @@ class OverlayPanel: NSPanel {
         isOpaque = false
         backgroundColor = .clear
         hasShadow = true
+        // The overlay content is white-on-dark: pin the dark HUD look instead of following the system light mode.
+        appearance = NSAppearance(named: .vibrantDark)
         hidesOnDeactivate = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         isExcludedFromWindowsMenu = true
@@ -42,8 +44,11 @@ class OverlayPanel: NSPanel {
         visualEffect.material = NSVisualEffectView.Material.hudWindow
         visualEffect.blendingMode = NSVisualEffectView.BlendingMode.behindWindow
         visualEffect.state = NSVisualEffectView.State.active
+        // The behind-window blur is composited by the WindowServer and ignores the layer's cornerRadius: without a
+        // mask image it fills the whole window rectangle (square background behind the rounded corners).
+        visualEffect.maskImage = Self.roundedMaskImage(size: contentRect.size, cornerRadius: Self.cornerRadius)
         visualEffect.wantsLayer = true
-        visualEffect.layer?.cornerRadius = 22
+        visualEffect.layer?.cornerRadius = Self.cornerRadius
         visualEffect.layer?.masksToBounds = true
         visualEffect.autoresizingMask = [.width, .height]
 
@@ -57,6 +62,18 @@ class OverlayPanel: NSPanel {
 
         visualEffect.addSubview(hostingView)
         contentView_ = visualEffect
+    }
+
+    private static let cornerRadius: CGFloat = 22
+
+    /// Rounded-rect mask at the panel's exact size. A stretchable mask (cap insets) left a seam on the center row
+    /// that the window shadow drew as two thin lines beside the capsule; the panel never resizes, so no stretching.
+    private static func roundedMaskImage(size: NSSize, cornerRadius: CGFloat) -> NSImage {
+        NSImage(size: size, flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius).fill()
+            return true
+        }
     }
 
     private var contentView_: NSView? {
@@ -88,6 +105,7 @@ class OverlayPanel: NSPanel {
 
         alphaValue = 0
         orderFrontRegardless()
+        invalidateShadow()  // Shadow follows the rounded mask, not the window rectangle
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.25
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)

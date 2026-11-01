@@ -31,7 +31,7 @@ struct OverlayContentView: View {
                 EmptyView()
             }
         }
-        .frame(width: 360, height: 80)
+        .frame(width: 360, height: 86)
         .animation(AppAnimation.spring, value: appState.currentState)
     }
 }

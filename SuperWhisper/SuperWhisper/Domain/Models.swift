@@ -4,6 +4,7 @@ import Foundation
 
 /// Available OpenAI transcription models.
 enum TranscriptionModel: String, CaseIterable, CustomStringConvertible, Codable {
+    case gptTranscribe = "gpt-transcribe"
     case whisper1 = "whisper-1"
     case gpt4oMiniTranscribe = "gpt-4o-mini-transcribe"
     case gpt4oTranscribe = "gpt-4o-transcribe"
@@ -11,6 +12,7 @@ enum TranscriptionModel: String, CaseIterable, CustomStringConvertible, Codable 
 
     var description: String {
         switch self {
+        case .gptTranscribe: return "GPT Transcribe"
         case .whisper1: return "Whisper v1"
         case .gpt4oMiniTranscribe: return "GPT-4o Mini Transcribe"
         case .gpt4oTranscribe: return "GPT-4o Transcribe"
@@ -22,13 +24,45 @@ enum TranscriptionModel: String, CaseIterable, CustomStringConvertible, Codable 
     var jsonResponseOnly: Bool {
         switch self {
         case .whisper1: return false
-        case .gpt4oMiniTranscribe, .gpt4oTranscribe, .gpt4oTranscribeDiarize: return true
+        case .gptTranscribe, .gpt4oMiniTranscribe, .gpt4oTranscribe, .gpt4oTranscribeDiarize: return true
         }
     }
 
     /// Whether this model requires chunking_strategy for audio > 30s.
     var requiresChunkingStrategy: Bool {
         self == .gpt4oTranscribeDiarize
+    }
+
+    /// gpt-transcribe takes the vocabulary in `keywords[]` and the languages in `languages[]`; the older models take
+    /// a single `language` and the vocabulary as a `prompt` hint.
+    var acceptsKeywords: Bool { self == .gptTranscribe }
+
+    /// When this model fails for a reason other than the key, the same audio is retried on this one.
+    var fallbackModel: TranscriptionModel? { self == .gptTranscribe ? .gpt4oTranscribe : nil }
+}
+
+/// Business and tech terms the transcription should spell right, from the Jarvis Voz bridge on mark2
+/// (transcricao_com_gemini.VOCABULARIO_DO_OPERADOR, 31/10/2026). Only terms: example phrases in the hint came back as the
+/// transcription of silent audio. Personal names and places live only in the local settings (Settings → Vocabulary),
+/// never in this public repository.
+enum TranscriptionVocabulary {
+    static let defaultOperatorTerms = [
+        "Jarvis", "Hey Jarvis", "Jarvis Voz", "SuperWhisper", "CTO", "CEO",
+        "Kestra", "Kestra Agency", "DirectAds", "DirectCash", "MedyCallis", "NC Caps", "Jev", "Loot", "LootRush",
+        "mark2", "mark3", "mark5", "mark7", "mark8", "mark9", "Scriptorium", "portal", "Gerente", "MultiWA",
+        "PR", "pull request", "deploy", "beta", "main", "merge", "GitHub", "Railway", "Cloudflare", "DigitalOcean",
+        "BM", "Meta", "Facebook Ads", "Graph API", "Direct Response", "Stripe", "Pluggy", "WhatsApp", "Whapi", "Whapi Cloud",
+        "UTMify", "CAPI", "pixel", "ROAS", "CPA", "CPM", "CTR", "checkout", "top-up",
+        "Claude", "Claude Code", "Haiku", "Sonnet", "Opus", "Codex", "Gemini", "tick", "ticks",
+        "BetterStack", "Sentry", "NestJS", "Next.js", "Prisma", "BullMQ", "AirPods", "MacBook",
+    ]
+
+    static func terms(from commaSeparatedTerms: String) -> [String] {
+        commaSeparatedTerms.split(whereSeparator: { $0 == "," || $0.isNewline }).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+    }
+
+    static func promptHint(for terms: [String]) -> String {
+        terms.isEmpty ? "" : "Termos comuns: " + terms.joined(separator: ", ") + "."
     }
 }
 

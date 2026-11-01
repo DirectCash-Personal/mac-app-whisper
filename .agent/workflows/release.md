@@ -20,7 +20,7 @@ Edit the code as needed for the new version.
 ### 2. Run the release script
 
 ```bash
-cd /Users/lucascanavarro/Desktop/Em\ Andamento/mac-app-whisper/SuperWhisper
+cd ~/Projects/mac-app-whisper/SuperWhisper
 ./scripts/release.sh <VERSION>
 ```
 
@@ -36,7 +36,7 @@ This script will:
 ### 3. Commit and push
 
 ```bash
-cd /Users/lucascanavarro/Desktop/Em\ Andamento/mac-app-whisper
+cd ~/Projects/mac-app-whisper
 git add -A
 git commit -m "release: v<VERSION>"
 git tag v<VERSION>

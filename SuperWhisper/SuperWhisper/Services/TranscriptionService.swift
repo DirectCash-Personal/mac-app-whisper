@@ -16,8 +16,23 @@ class TranscriptionService {
         self.session = session
     }
 
-    /// Transcribes the audio file with automatic retry for transient errors.
+    /// Transcribes with the selected model, falls back to the model's fallback when it fails for a reason other than
+    /// the key, and applies the operator's term corrections.
     func transcribe(audioFileURL: URL) async throws -> String {
+        let selectedModel = settingsService.selectedModel
+        let rawText: String
+        do {
+            rawText = try await transcribeWithRetry(audioFileURL: audioFileURL, model: selectedModel)
+        } catch {
+            guard let fallbackModel = selectedModel.fallbackModel, isFallbackWorthyError(error) else { throw error }
+            print("⚠️ \(selectedModel.rawValue) failed (\(error.localizedDescription)); retrying on \(fallbackModel.rawValue)")
+            rawText = try await transcribeWithRetry(audioFileURL: audioFileURL, model: fallbackModel)
+        }
+        return TranscriptionTermCorrectionService.correctOperatorTerms(in: rawText)
+    }
+
+    /// Transcribes the audio file with automatic retry for transient errors.
+    private func transcribeWithRetry(audioFileURL: URL, model: TranscriptionModel) async throws -> String {
         guard let apiKey = settingsService.apiKey, !apiKey.isEmpty else {
             throw TranscriptionError.noAPIKey
         }
@@ -37,8 +52,7 @@ class TranscriptionService {
             }
 
             do {
-                let result = try await executeTranscription(audioFileURL: audioFileURL, apiKey: apiKey)
-                return result
+                return try await transcriptionCheckedForHintEcho(audioFileURL: audioFileURL, apiKey: apiKey, model: model)
             } catch {
                 lastError = error
 
@@ -72,9 +86,37 @@ class TranscriptionService {
 
     // MARK: - Private
 
+    /// Models that take the vocabulary as a prompt can return the hint itself on audio without speech
+    /// ("Termos comuns: ...", or the "context:" wrapper of gpt-4o-transcribe); that answer is redone once without the hint.
+    private func transcriptionCheckedForHintEcho(audioFileURL: URL, apiKey: String, model: TranscriptionModel) async throws -> String {
+        let vocabularyTerms = settingsService.vocabularyTermList
+        let text = try await executeTranscription(audioFileURL: audioFileURL, apiKey: apiKey, model: model, vocabularyTerms: vocabularyTerms)
+        guard !model.acceptsKeywords, !vocabularyTerms.isEmpty, Self.looksLikeHintEcho(text) else { return text }
+        print("⚠️ Transcription echoed the vocabulary hint; redoing without it")
+        return try await executeTranscription(audioFileURL: audioFileURL, apiKey: apiKey, model: model, vocabularyTerms: [])
+    }
+
+    /// Nothing was captured: empty, or only spaces and punctuation ("." or "…" for a silent take).
+    static func hasSpokenContent(_ text: String) -> Bool {
+        text.unicodeScalars.contains { CharacterSet.letters.union(.decimalDigits).contains($0) }
+    }
+
+    static func looksLikeHintEcho(_ text: String) -> Bool {
+        text.range(of: #"(?i)\btermos comuns\s*:|\bcommon terms\s*:|\bcontext\s*:"#, options: .regularExpression) != nil
+    }
+
+    /// Network or server failures move to the fallback model; a bad or missing key would fail there too.
+    private func isFallbackWorthyError(_ error: Error) -> Bool {
+        guard let transcriptionError = error as? TranscriptionError else { return true }
+        switch transcriptionError {
+        case .noAPIKey, .invalidAPIKey, .audioFileMissing, .fileTooLarge: return false
+        case .networkError, .serverError, .invalidResponse, .timeout: return true
+        }
+    }
+
     /// Execute a single transcription request (no retry).
-    private func executeTranscription(audioFileURL: URL, apiKey: String) async throws -> String {
-        let model = settingsService.selectedModel
+    private func executeTranscription(audioFileURL: URL, apiKey: String, model: TranscriptionModel,
+                                      vocabularyTerms: [String]) async throws -> String {
         let language = settingsService.selectedLanguage
 
         let url = URL(string: "https://api.openai.com/v1/audio/transcriptions")!
@@ -110,9 +152,24 @@ class TranscriptionService {
         // Model field
         body.appendMultipart(boundary: boundary, name: "model", value: model.rawValue)
 
-        // Language field (if not auto)
-        if !language.rawValue.isEmpty {
-            body.appendMultipart(boundary: boundary, name: "language", value: language.rawValue)
+        if model.acceptsKeywords {
+            // gpt-transcribe: `languages[]` (never together with `language`) and the vocabulary in `keywords[]`.
+            // Portuguese goes with English because the operator mixes English terms ("PR", "deploy", "merge").
+            let spokenLanguages = language == .portuguese ? ["pt", "en"] : (language.rawValue.isEmpty ? [] : [language.rawValue])
+            for spokenLanguage in spokenLanguages {
+                body.appendMultipart(boundary: boundary, name: "languages[]", value: spokenLanguage)
+            }
+            for vocabularyTerm in vocabularyTerms {
+                body.appendMultipart(boundary: boundary, name: "keywords[]", value: vocabularyTerm)
+            }
+        } else {
+            if !language.rawValue.isEmpty {
+                body.appendMultipart(boundary: boundary, name: "language", value: language.rawValue)
+            }
+            let promptHint = TranscriptionVocabulary.promptHint(for: vocabularyTerms)
+            if !promptHint.isEmpty {
+                body.appendMultipart(boundary: boundary, name: "prompt", value: promptHint)
+            }
         }
 
         // Response format

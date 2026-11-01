@@ -6,7 +6,7 @@ import Sparkle
 
 /// AppDelegate handles global hotkey registration, the floating overlay panel,
 /// and the menu bar status item. The app runs as a menu bar app (no dock icon).
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     /// Shared instance for access from SwiftUI views (NSApp.delegate is wrapped by SwiftUI adapter)
     static private(set) var shared: AppDelegate?
 
@@ -23,6 +23,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var pendingService: PendingTranscriptionService?
     private var statusItem: NSStatusItem?
     private var pendingMenuItem: NSMenuItem?
+    private let microphoneGuardService = MicrophoneGuardService()
+    private var microphoneGuardMenuItem: NSMenuItem?
+    private var currentInputMenuItem: NSMenuItem?
+    private var lastBlockedInputMenuItem: NSMenuItem?
     private var settingsWindowController: NSWindowController?
     private let updateService = UpdateService()
     private var transcriptionTask: Task<Void, Never>?  // C6: Cancellable task handle
@@ -62,6 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self?.handleHotkeyPressed()
         }
         hotkeyService?.register()
+
+        // Keep a just-connected mic (AirPods) from becoming the default input
+        microphoneGuardService.start()
 
         // Setup menu bar status item
         setupStatusBar()
@@ -128,9 +135,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc private func handleDismissOverlay() {
+        // Dismiss only closes a notice (error or success). A late auto-dismiss must not end a new take in progress,
+        // now that processing -> idle is a valid transition (empty transcription).
+        guard let appState = appState else { return }
+        switch appState.currentState {
+        case .error, .success, .permissionsNeeded, .idle: break
+        default: return
+        }
         overlayPanel?.hideOverlay()
-        if appState?.currentState != .idle {
-            appState?.transition(to: .idle)
+        if appState.currentState != .idle {
+            appState.transition(to: .idle)
         }
     }
 
@@ -153,6 +167,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let dictationItem = NSMenuItem(title: "Start Dictation", action: #selector(startDictationFromMenu), keyEquivalent: "d")
         dictationItem.target = self
         menu.addItem(dictationItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Microphone guard: toggle, current input and the last blocked device (refreshed in menuNeedsUpdate)
+        let microphoneGuardItem = NSMenuItem(title: "Microphone Guard", action: #selector(toggleMicrophoneGuard), keyEquivalent: "")
+        microphoneGuardItem.target = self
+        microphoneGuardItem.toolTip = "Keeps AirPods and other new mics from becoming the default input"
+        self.microphoneGuardMenuItem = microphoneGuardItem
+        menu.addItem(microphoneGuardItem)
+
+        let currentInputItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        currentInputItem.isEnabled = false
+        self.currentInputMenuItem = currentInputItem
+        menu.addItem(currentInputItem)
+
+        let lastBlockedInputItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        lastBlockedInputItem.isEnabled = false
+        self.lastBlockedInputMenuItem = lastBlockedInputItem
+        menu.addItem(lastBlockedInputItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -185,7 +218,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         quitItem.target = self
         menu.addItem(quitItem)
 
+        menu.delegate = self
         statusItem?.menu = menu
+        refreshMicrophoneGuardMenuItems()
+    }
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshMicrophoneGuardMenuItems()
+    }
+
+    private func refreshMicrophoneGuardMenuItems() {
+        microphoneGuardMenuItem?.state = microphoneGuardService.isEnabled ? .on : .off
+        currentInputMenuItem?.title = "Input: \(microphoneGuardService.currentInputName)"
+        lastBlockedInputMenuItem?.title = "Last blocked: \(microphoneGuardService.lastBlockedSummary ?? "")"
+        lastBlockedInputMenuItem?.isHidden = microphoneGuardService.lastBlockedSummary == nil
+    }
+
+    @objc private func toggleMicrophoneGuard() {
+        microphoneGuardService.isEnabled.toggle()
     }
 
     private func updatePendingBadge() {
@@ -237,6 +287,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             .environmentObject(historyService)
             .environmentObject(pendingService)
             .environmentObject(audioPersistence)
+            .environmentObject(microphoneGuardService)
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 650, height: 550),
@@ -245,6 +296,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             defer: false
         )
         window.title = "SuperWhisper Settings"
+        // The settings are designed white-on-dark: pin dark so the title bar, sidebar and system controls match.
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.backgroundColor = NSColor(AppColors.background)
         window.contentView = NSHostingView(rootView: settingsView)
         window.center()
         window.setFrameAutosaveName("SettingsWindow")
@@ -438,7 +492,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     appState.retryInfo = nil
 
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         self.historyService?.addEntry(
                             text: trimmed,
                             model: model,
@@ -530,7 +584,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }
 
                 await MainActor.run {
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         let model = self.settingsService?.selectedModel.rawValue ?? entry.model
                         let language = self.settingsService?.selectedLanguage.rawValue ?? entry.language
                         // H4: Only remove if entry still exists (prevents duplicate on race)
@@ -606,7 +660,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
             await MainActor.run {
-                if !trimmed.isEmpty {
+                if TranscriptionService.hasSpokenContent(trimmed) {
                     // C2: Pass audioFilename so entry has play/retranscribe
                     self.historyService?.addEntry(
                         text: trimmed,
@@ -631,6 +685,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let appState = appState,
               let pasteService = pasteService,
               let settingsService = settingsService else { return }
+
+        // A silent take comes back empty (or only punctuation): pasting it would wipe the clipboard and send Cmd+V for nothing,
+        // and the success state would claim a paste that never happened. Just close the overlay.
+        guard TranscriptionService.hasSpokenContent(text) else {
+            overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
+            return
+        }
 
         if settingsService.autoPasteEnabled {
             overlayPanel?.hideOverlay()
@@ -690,8 +752,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         appState?.transition(to: .error("Recording cancelled. Audio saved to History."))
         overlayPanel?.showOverlay()
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
-            self?.overlayPanel?.hideOverlay()
-            self?.appState?.transition(to: .idle)
+            // Only undo the cancel notice: a new take started in these 2.5 s must keep its overlay and its paste.
+            guard let self, let appState = self.appState, case .error = appState.currentState else { return }
+            self.overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
         }
     }
 
