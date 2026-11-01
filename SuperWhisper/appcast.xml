@@ -5,6 +5,15 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>1.1.3</title>
+            <pubDate>Sun, 01 Nov 2026 13:20:37 -0300</pubDate>
+            <sparkle:version>202611011312</sparkle:version>
+            <sparkle:shortVersionString>1.1.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/DirectCash-Personal/mac-app-whisper/releases/download/v1.1.3/SuperWhisper-1.1.3.dmg" length="3512705" type="application/octet-stream" sparkle:edSignature="jxgwBnNW3Utl0sycw5KbznQjxLZgrsagF//QvVnodBSTATL3tYiN/nKKexKS+pqbeBl2uvEdgV9sd+NdXD1EBQ=="/>
+        </item>
+        <item>
             <title>1.1.2</title>
             <pubDate>Sun, 01 Nov 2026 12:44:59 -0300</pubDate>
             <sparkle:version>202611011222</sparkle:version>
