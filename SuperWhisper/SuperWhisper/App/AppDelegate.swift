@@ -135,9 +135,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
     }
 
     @objc private func handleDismissOverlay() {
+        // Dismiss only closes a notice (error or success). A late auto-dismiss must not end a new take in progress,
+        // now that processing -> idle is a valid transition (empty transcription).
+        guard let appState = appState else { return }
+        switch appState.currentState {
+        case .error, .success, .permissionsNeeded, .idle: break
+        default: return
+        }
         overlayPanel?.hideOverlay()
-        if appState?.currentState != .idle {
-            appState?.transition(to: .idle)
+        if appState.currentState != .idle {
+            appState.transition(to: .idle)
         }
     }
 
@@ -485,7 +492,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
                     appState.retryInfo = nil
 
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         self.historyService?.addEntry(
                             text: trimmed,
                             model: model,
@@ -577,7 +584,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
                 }
 
                 await MainActor.run {
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         let model = self.settingsService?.selectedModel.rawValue ?? entry.model
                         let language = self.settingsService?.selectedLanguage.rawValue ?? entry.language
                         // H4: Only remove if entry still exists (prevents duplicate on race)
@@ -653,7 +660,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
             await MainActor.run {
-                if !trimmed.isEmpty {
+                if TranscriptionService.hasSpokenContent(trimmed) {
                     // C2: Pass audioFilename so entry has play/retranscribe
                     self.historyService?.addEntry(
                         text: trimmed,
@@ -678,6 +685,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
         guard let appState = appState,
               let pasteService = pasteService,
               let settingsService = settingsService else { return }
+
+        // A silent take comes back empty (or only punctuation): pasting it would wipe the clipboard and send Cmd+V for nothing,
+        // and the success state would claim a paste that never happened. Just close the overlay.
+        guard TranscriptionService.hasSpokenContent(text) else {
+            overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
+            return
+        }
 
         if settingsService.autoPasteEnabled {
             overlayPanel?.hideOverlay()
@@ -737,8 +752,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
         appState?.transition(to: .error("Recording cancelled. Audio saved to History."))
         overlayPanel?.showOverlay()
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
-            self?.overlayPanel?.hideOverlay()
-            self?.appState?.transition(to: .idle)
+            // Only undo the cancel notice: a new take started in these 2.5 s must keep its overlay and its paste.
+            guard let self, let appState = self.appState, case .error = appState.currentState else { return }
+            self.overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
         }
     }
 

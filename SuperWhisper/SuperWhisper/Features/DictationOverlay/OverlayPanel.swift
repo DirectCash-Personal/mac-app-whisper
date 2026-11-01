@@ -46,7 +46,7 @@ class OverlayPanel: NSPanel {
         visualEffect.state = NSVisualEffectView.State.active
         // The behind-window blur is composited by the WindowServer and ignores the layer's cornerRadius: without a
         // mask image it fills the whole window rectangle (square background behind the rounded corners).
-        visualEffect.maskImage = Self.roundedMaskImage(cornerRadius: Self.cornerRadius)
+        visualEffect.maskImage = Self.roundedMaskImage(size: contentRect.size, cornerRadius: Self.cornerRadius)
         visualEffect.wantsLayer = true
         visualEffect.layer?.cornerRadius = Self.cornerRadius
         visualEffect.layer?.masksToBounds = true
@@ -66,17 +66,14 @@ class OverlayPanel: NSPanel {
 
     private static let cornerRadius: CGFloat = 22
 
-    /// Stretchable rounded-rect mask: only the cap insets keep their shape when the panel is resized.
-    private static func roundedMaskImage(cornerRadius: CGFloat) -> NSImage {
-        let edgeLength = cornerRadius * 2 + 1
-        let maskImage = NSImage(size: NSSize(width: edgeLength, height: edgeLength), flipped: false) { rect in
+    /// Rounded-rect mask at the panel's exact size. A stretchable mask (cap insets) left a seam on the center row
+    /// that the window shadow drew as two thin lines beside the capsule; the panel never resizes, so no stretching.
+    private static func roundedMaskImage(size: NSSize, cornerRadius: CGFloat) -> NSImage {
+        NSImage(size: size, flipped: false) { rect in
             NSColor.black.setFill()
             NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius).fill()
             return true
         }
-        maskImage.capInsets = NSEdgeInsets(top: cornerRadius, left: cornerRadius, bottom: cornerRadius, right: cornerRadius)
-        maskImage.resizingMode = .stretch
-        return maskImage
     }
 
     private var contentView_: NSView? {

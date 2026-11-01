@@ -51,6 +51,7 @@ class AppStateManager: ObservableObject {
              (.recording, .idle),        // cancel
              (.recording, .error),       // mid-recording error (mic disconnect)
              (.processing, .success),
+             (.processing, .idle),       // empty transcription (silence): nothing to paste
              (.processing, .error),
              (.success, .idle),
              (.error, .idle),

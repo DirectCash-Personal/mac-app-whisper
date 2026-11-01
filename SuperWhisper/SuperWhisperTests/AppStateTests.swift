@@ -44,6 +44,13 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(appState.currentState, .success)
     }
 
+    func testProcessingToIdleForEmptyTranscription() {
+        appState.transition(to: .recording)
+        appState.transition(to: .processing)
+        appState.transition(to: .idle)
+        XCTAssertEqual(appState.currentState, .idle)
+    }
+
     func testSuccessToIdle() {
         appState.transition(to: .recording)
         appState.transition(to: .processing)
