@@ -106,7 +106,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
         // Pre-request microphone permission at launch
         requestMicrophoneIfNeeded()
 
-        // Start Sparkle auto-updater
+        // Start Sparkle auto-updater; a downloaded update installs only while no dictation is running
+        updateService.isSafeToInstallUpdate = { [weak appState] in appState?.currentState == .idle }
         updateService.startUpdater()
 
         print("SuperWhisper ready!")
@@ -288,6 +289,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
             .environmentObject(pendingService)
             .environmentObject(audioPersistence)
             .environmentObject(microphoneGuardService)
+            .environmentObject(updateService)
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 650, height: 550),
