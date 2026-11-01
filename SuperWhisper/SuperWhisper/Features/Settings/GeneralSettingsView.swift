@@ -167,7 +167,9 @@ struct GeneralSettingsView: View {
                             Text("Preferred input")
                                 .font(AppTypography.bodyMedium)
                                 .foregroundColor(AppColors.textPrimary)
-                            Spacer()
+                                .lineLimit(1)
+                                .fixedSize()
+                            Spacer(minLength: AppSpacing.md)
                             Picker("", selection: Binding(
                                 get: { microphoneGuardService.preferredInputUID },
                                 set: { microphoneGuardService.choosePreferredInput(deviceUID: $0) }
@@ -177,7 +179,7 @@ struct GeneralSettingsView: View {
                                 }
                             }
                             .labelsHidden()
-                            .fixedSize()
+                            .frame(maxWidth: 280)
                         }
                         .padding(.vertical, AppSpacing.xs)
                     }
