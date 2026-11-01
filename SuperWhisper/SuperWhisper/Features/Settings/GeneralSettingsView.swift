@@ -4,6 +4,7 @@ import SwiftUI
 /// Matches Stitch "General Settings - SuperWhisper" screen.
 struct GeneralSettingsView: View {
     @EnvironmentObject var settingsService: SettingsService
+    @EnvironmentObject var microphoneGuardService: MicrophoneGuardService
     @StateObject private var updateService = UpdateService()
     @State private var apiKeyInput: String = ""
     @State private var isTestingKey: Bool = false
@@ -27,9 +28,6 @@ struct GeneralSettingsView: View {
                 // API Connection Section
                 SectionCard(title: "API Connection", icon: "key.fill") {
                     VStack(alignment: .leading, spacing: AppSpacing.md) {
-                        Text("Configure your OpenAI API key for transcription services.")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.textTertiary)
 
                         if hasStoredKey {
                             // Saved state — show masked key + Change button
@@ -116,9 +114,6 @@ struct GeneralSettingsView: View {
                 // Transcription Section
                 SectionCard(title: "Transcription", icon: "translate") {
                     VStack(alignment: .leading, spacing: AppSpacing.md) {
-                        Text("Select the AI model and language preferences.")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.textTertiary)
 
                         HStack(spacing: AppSpacing.lg) {
                             DropdownField(
@@ -133,18 +128,64 @@ struct GeneralSettingsView: View {
                                 selection: $settingsService.selectedLanguage
                             )
                         }
+
+                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                            Text("Vocabulary")
+                                .font(AppTypography.captionMedium)
+                                .foregroundColor(AppColors.textSecondary)
+                                .help("Names and terms the transcription should spell right, separated by commas")
+                            TextEditor(text: $settingsService.vocabularyTerms)
+                                .font(AppTypography.caption)
+                                .scrollContentBackground(.hidden)
+                                .padding(AppSpacing.sm)
+                                .frame(minHeight: 90)
+                                .background(
+                                    RoundedRectangle(cornerRadius: AppRadius.md)
+                                        .fill(AppColors.surface)
+                                )
+                        }
+                    }
+                }
+
+                // Microphone Section
+                SectionCard(title: "Microphone", icon: "mic.fill") {
+                    VStack(spacing: AppSpacing.sm) {
+                        ToggleRow(
+                            "Microphone Guard",
+                            description: "Keeps AirPods and other just-connected mics from becoming the default input",
+                            icon: "airpodspro",
+                            isOn: $microphoneGuardService.isEnabled
+                        )
+
+                        Divider().opacity(0.2)
+
+                        HStack(spacing: AppSpacing.md) {
+                            Image(systemName: "mic")
+                                .font(.system(size: 13))
+                                .foregroundColor(AppColors.accent)
+                                .frame(width: 20)
+                            Text("Preferred input")
+                                .font(AppTypography.bodyMedium)
+                                .foregroundColor(AppColors.textPrimary)
+                            Spacer()
+                            Picker("", selection: Binding(
+                                get: { microphoneGuardService.preferredInputUID },
+                                set: { microphoneGuardService.choosePreferredInput(deviceUID: $0) }
+                            )) {
+                                ForEach(microphoneGuardService.inputDevices, id: \.deviceUID) { inputDevice in
+                                    Text(inputDevice.deviceName).tag(inputDevice.deviceUID)
+                                }
+                            }
+                            .labelsHidden()
+                            .fixedSize()
+                        }
+                        .padding(.vertical, AppSpacing.xs)
                     }
                 }
 
                 // Behavior Section
                 SectionCard(title: "Behavior", icon: "tune") {
                     VStack(spacing: AppSpacing.sm) {
-                        Text("Customize how the app reacts after recording.")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.textTertiary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Divider().opacity(0.2)
 
                         ToggleRow(
                             "Auto-paste after transcription",
@@ -172,12 +213,6 @@ struct GeneralSettingsView: View {
                 // Startup Section
                 SectionCard(title: "Startup", icon: "power") {
                     VStack(spacing: AppSpacing.sm) {
-                        Text("Control how the app starts with your Mac.")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.textTertiary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Divider().opacity(0.2)
 
                         ToggleRow(
                             "Launch at Login",
@@ -191,22 +226,14 @@ struct GeneralSettingsView: View {
                 // Updates Section
                 SectionCard(title: "Updates", icon: "arrow.triangle.2.circlepath") {
                     VStack(spacing: AppSpacing.sm) {
-                        Text("Control how the app checks for new versions.")
-                            .font(AppTypography.caption)
-                            .foregroundColor(AppColors.textTertiary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                        Divider().opacity(0.2)
 
                         HStack {
                             VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                 Text("Automatically check for updates")
                                     .font(AppTypography.bodyMedium)
                                     .foregroundColor(AppColors.textPrimary)
-                                Text("Check once every 24 hours in the background")
-                                    .font(AppTypography.caption)
-                                    .foregroundColor(AppColors.textTertiary)
-                            }
+                                    .help("Check once every 24 hours in the background")
+                                            }
 
                             Spacer()
 

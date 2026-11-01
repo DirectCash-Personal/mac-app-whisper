@@ -86,9 +86,13 @@ fi
 # Sign with SuperWhisper Developer certificate + entitlements
 echo -e "   ${YELLOW}🔐 Signing with certificate...${NC}"
 xattr -rc "$APP_PATH" 2>/dev/null
+# A stable identity keeps Microphone and Accessibility permissions across updates (ad-hoc signing ties them to the binary hash).
 CERT_SHA=$(security find-identity -v -p codesigning | grep "SuperWhisper Developer" | head -1 | awk '{print $2}')
 if [ -z "$CERT_SHA" ]; then
-    echo -e "${RED}❌ 'SuperWhisper Developer' certificate not found. Run scripts/setup-signing.sh first.${NC}"
+    CERT_SHA=$(security find-identity -v -p codesigning | grep "Apple Development" | head -1 | awk '{print $2}')
+fi
+if [ -z "$CERT_SHA" ]; then
+    echo -e "${RED}❌ No signing certificate found ('SuperWhisper Developer' or 'Apple Development'). Run scripts/setup-signing.sh first.${NC}"
     exit 1
 fi
 codesign --force --deep --sign "$CERT_SHA" \

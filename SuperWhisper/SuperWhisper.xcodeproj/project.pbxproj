@@ -15,6 +15,8 @@
 		321991D7EE5D89AB688245D8 /* ShortcutRecorderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF776E3F07E079D3037926D /* ShortcutRecorderView.swift */; };
 		3545FA857029F4E519881F1D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA2074FA87F4AA86E6FBC26 /* AppDelegate.swift */; };
 		37AA43C7A4ABBFD854E712A3 /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5CE84CBBF34309F3116CE1 /* GlassCard.swift */; };
+		42DBC4E16EDC04BB0BE751A1 /* TranscriptionTermCorrectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A30791E9C7D680B93F9361 /* TranscriptionTermCorrectionTests.swift */; };
+		445807E8D08EA0287785BB71 /* TranscriptionTermCorrectionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B96E90C8F11997F10053788 /* TranscriptionTermCorrectionService.swift */; };
 		49C3D8AE98AC2B339F47A94F /* ToggleRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E5CB35FCB4EDA4C65ED60BD /* ToggleRow.swift */; };
 		5EE936085B96BB83E42A2112 /* SettingsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3C8D875BFBBF6DDF20C1628 /* SettingsServiceTests.swift */; };
 		5F06955A8FEC7F02493439FB /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF742A8E6C09689DC3612D0 /* SettingsWindow.swift */; };
@@ -26,6 +28,7 @@
 		6FDFC8F8FCFB2064AA388F57 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943986652D75378B798102CE /* AppState.swift */; };
 		742838E55D009DBDAC7A4178 /* PermissionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE67F2CD95347CD87BF75D11 /* PermissionsService.swift */; };
 		7E5CB38DEE6B215DE4FD81FA /* TranscriptionHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A32862973C34D393CE099E /* TranscriptionHistoryService.swift */; };
+		859DCA4EFC84E812BF35F677 /* MicrophoneGuardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D926FCCFE1D539B0069A64B3 /* MicrophoneGuardService.swift */; };
 		867FC064C418229E7B399011 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 209251462EDF476EFA1E8A6D /* Sparkle */; };
 		8A4B03C19C1DD8EBEF5F73BC /* PasteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDDE3F8122451F181DFDAB7 /* PasteService.swift */; };
 		8AA1ED3B135A2798FD81ED7B /* AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB105C042963B038E50C9A4E /* AudioCaptureService.swift */; };
@@ -70,7 +73,9 @@
 		42E6A057A08080E2ACE3FE79 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		4ECBEE61BD345623663AE9A8 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
 		54EF798381983CC437AAAB7D /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
+		55A30791E9C7D680B93F9361 /* TranscriptionTermCorrectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionTermCorrectionTests.swift; sourceTree = "<group>"; };
 		572D1527E54BD5DB524826AD /* OverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanel.swift; sourceTree = "<group>"; };
+		5B96E90C8F11997F10053788 /* TranscriptionTermCorrectionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionTermCorrectionService.swift; sourceTree = "<group>"; };
 		5E5CB35FCB4EDA4C65ED60BD /* ToggleRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleRow.swift; sourceTree = "<group>"; };
 		63BB580F9FB81FC123C8AB04 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6A4035DFF59C935B6E11CE07 /* ShortcutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSettingsView.swift; sourceTree = "<group>"; };
@@ -90,6 +95,7 @@
 		CAC15817F02CEFD26123BA02 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		CC39D54A34DED31FEBBEDE38 /* SuperWhisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SuperWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD84728FDDBB4745E5E3A3E9 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		D926FCCFE1D539B0069A64B3 /* MicrophoneGuardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneGuardService.swift; sourceTree = "<group>"; };
 		DDF776E3F07E079D3037926D /* ShortcutRecorderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorderView.swift; sourceTree = "<group>"; };
 		E3C8D875BFBBF6DDF20C1628 /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
 		EBC4EC8A161F18359D2B035D /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
@@ -117,6 +123,7 @@
 				3124CAA89A5698EA0AF6F286 /* AppStateTests.swift */,
 				E3C8D875BFBBF6DDF20C1628 /* SettingsServiceTests.swift */,
 				F90713365ACB9D92B925BF52 /* TranscriptionServiceTests.swift */,
+				55A30791E9C7D680B93F9361 /* TranscriptionTermCorrectionTests.swift */,
 			);
 			path = SuperWhisperTests;
 			sourceTree = "<group>";
@@ -128,12 +135,14 @@
 				C676303FC9ABFB49AD5FED30 /* AudioCompressionService.swift */,
 				12F2D403890F8B3EAB7D8A15 /* AudioPersistenceService.swift */,
 				B7AB2B73034041AE6E0985B5 /* HotkeyService.swift */,
+				D926FCCFE1D539B0069A64B3 /* MicrophoneGuardService.swift */,
 				FBDDE3F8122451F181DFDAB7 /* PasteService.swift */,
 				B00F02DD9DFDAF17F6D4EEB1 /* PendingTranscriptionService.swift */,
 				EE67F2CD95347CD87BF75D11 /* PermissionsService.swift */,
 				54EF798381983CC437AAAB7D /* SettingsService.swift */,
 				B4A32862973C34D393CE099E /* TranscriptionHistoryService.swift */,
 				0A64F1C3D27D74911663C9D3 /* TranscriptionService.swift */,
+				5B96E90C8F11997F10053788 /* TranscriptionTermCorrectionService.swift */,
 				8C7CAFC9B80F6B4FA0872C9E /* UpdateService.swift */,
 			);
 			path = Services;
@@ -177,13 +186,6 @@
 				EBC4EC8A161F18359D2B035D /* PermissionsView.swift */,
 			);
 			path = Permissions;
-			sourceTree = "<group>";
-		};
-		5A52B3AA5D2AD5A056D3D8C0 /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Tests;
 			sourceTree = "<group>";
 		};
 		75D97FF9944D78345D5786F5 /* MainWindow */ = {
@@ -232,7 +234,6 @@
 				F332692C86B5D1D5440B3524 /* Features */,
 				C854BA4B2D085C58D0620753 /* Resources */,
 				22A8E1D1220ACFB7E2351BEB /* Services */,
-				5A52B3AA5D2AD5A056D3D8C0 /* Tests */,
 				EDF3AADDA01AB296E78A5141 /* UI */,
 			);
 			path = SuperWhisper;
@@ -335,7 +336,6 @@
 				};
 			};
 			buildConfigurationList = 44061A94EF14330440F5E2E6 /* Build configuration list for PBXProject "SuperWhisper" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -348,6 +348,7 @@
 				3773797490E5AA1FAE397A20 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 40F414AB32342697B22B8B2B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -387,6 +388,7 @@
 				D8F5767D0C2E8AF66FD6E6D4 /* HistoryView.swift in Sources */,
 				99FAECB49F56178B2CAA6A8C /* HotkeyService.swift in Sources */,
 				9E885A2AA3573384659F6B2E /* MainWindowView.swift in Sources */,
+				859DCA4EFC84E812BF35F677 /* MicrophoneGuardService.swift in Sources */,
 				CC18ADC07C0642E40E83E632 /* Models.swift in Sources */,
 				A9C654B7ED2182AEE49B0FF7 /* OverlayContentView.swift in Sources */,
 				C168F905481E347AC3DE6CD8 /* OverlayPanel.swift in Sources */,
@@ -404,6 +406,7 @@
 				49C3D8AE98AC2B339F47A94F /* ToggleRow.swift in Sources */,
 				7E5CB38DEE6B215DE4FD81FA /* TranscriptionHistoryService.swift in Sources */,
 				CA7F9BF141CC39B81AE661EC /* TranscriptionService.swift in Sources */,
+				445807E8D08EA0287785BB71 /* TranscriptionTermCorrectionService.swift in Sources */,
 				1FD4D4747270CDFC5CF7021F /* UpdateService.swift in Sources */,
 				018A9BFADEB4D922FD5D1BA1 /* WaveformView.swift in Sources */,
 			);
@@ -416,6 +419,7 @@
 				63E0C643ED5F3A4E223A7E1E /* AppStateTests.swift in Sources */,
 				5EE936085B96BB83E42A2112 /* SettingsServiceTests.swift in Sources */,
 				8C30495E7DF8151F397C8602 /* TranscriptionServiceTests.swift in Sources */,
+				42DBC4E16EDC04BB0BE751A1 /* TranscriptionTermCorrectionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

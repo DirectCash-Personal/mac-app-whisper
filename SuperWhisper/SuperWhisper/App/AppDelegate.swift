@@ -6,7 +6,7 @@ import Sparkle
 
 /// AppDelegate handles global hotkey registration, the floating overlay panel,
 /// and the menu bar status item. The app runs as a menu bar app (no dock icon).
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     /// Shared instance for access from SwiftUI views (NSApp.delegate is wrapped by SwiftUI adapter)
     static private(set) var shared: AppDelegate?
 
@@ -23,6 +23,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var pendingService: PendingTranscriptionService?
     private var statusItem: NSStatusItem?
     private var pendingMenuItem: NSMenuItem?
+    private let microphoneGuardService = MicrophoneGuardService()
+    private var microphoneGuardMenuItem: NSMenuItem?
+    private var currentInputMenuItem: NSMenuItem?
+    private var lastBlockedInputMenuItem: NSMenuItem?
     private var settingsWindowController: NSWindowController?
     private let updateService = UpdateService()
     private var transcriptionTask: Task<Void, Never>?  // C6: Cancellable task handle
@@ -62,6 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self?.handleHotkeyPressed()
         }
         hotkeyService?.register()
+
+        // Keep a just-connected mic (AirPods) from becoming the default input
+        microphoneGuardService.start()
 
         // Setup menu bar status item
         setupStatusBar()
@@ -156,6 +163,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        // Microphone guard: toggle, current input and the last blocked device (refreshed in menuNeedsUpdate)
+        let microphoneGuardItem = NSMenuItem(title: "Microphone Guard", action: #selector(toggleMicrophoneGuard), keyEquivalent: "")
+        microphoneGuardItem.target = self
+        microphoneGuardItem.toolTip = "Keeps AirPods and other new mics from becoming the default input"
+        self.microphoneGuardMenuItem = microphoneGuardItem
+        menu.addItem(microphoneGuardItem)
+
+        let currentInputItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        currentInputItem.isEnabled = false
+        self.currentInputMenuItem = currentInputItem
+        menu.addItem(currentInputItem)
+
+        let lastBlockedInputItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        lastBlockedInputItem.isEnabled = false
+        self.lastBlockedInputMenuItem = lastBlockedInputItem
+        menu.addItem(lastBlockedInputItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         // Pending transcriptions item (hidden when no pending)
         let pendingItem = NSMenuItem(title: "No pending transcriptions", action: #selector(showSettings), keyEquivalent: "")
         pendingItem.target = self
@@ -185,7 +211,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         quitItem.target = self
         menu.addItem(quitItem)
 
+        menu.delegate = self
         statusItem?.menu = menu
+        refreshMicrophoneGuardMenuItems()
+    }
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshMicrophoneGuardMenuItems()
+    }
+
+    private func refreshMicrophoneGuardMenuItems() {
+        microphoneGuardMenuItem?.state = microphoneGuardService.isEnabled ? .on : .off
+        currentInputMenuItem?.title = "Input: \(microphoneGuardService.currentInputName)"
+        lastBlockedInputMenuItem?.title = "Last blocked: \(microphoneGuardService.lastBlockedSummary ?? "")"
+        lastBlockedInputMenuItem?.isHidden = microphoneGuardService.lastBlockedSummary == nil
+    }
+
+    @objc private func toggleMicrophoneGuard() {
+        microphoneGuardService.isEnabled.toggle()
     }
 
     private func updatePendingBadge() {
@@ -237,6 +280,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             .environmentObject(historyService)
             .environmentObject(pendingService)
             .environmentObject(audioPersistence)
+            .environmentObject(microphoneGuardService)
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 650, height: 550),
