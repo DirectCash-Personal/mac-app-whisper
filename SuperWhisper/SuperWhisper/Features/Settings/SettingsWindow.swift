@@ -43,7 +43,7 @@ struct SettingsWindow: View {
             }
             .padding(AppSpacing.md)
             .frame(width: 160)
-            .background(AppColors.background.opacity(0.5))
+            .background(AppColors.sidebarBackground)
 
             // Content
             Group {
@@ -62,6 +62,7 @@ struct SettingsWindow: View {
             .background(AppColors.background)
         }
         .frame(minWidth: 650, maxWidth: 700, minHeight: 550, maxHeight: 700)
+        .preferredColorScheme(.dark)
         .environmentObject(settingsService)
         .onAppear {
             selectedTab = initialTab

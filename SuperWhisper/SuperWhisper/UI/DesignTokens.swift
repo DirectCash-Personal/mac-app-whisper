@@ -23,6 +23,7 @@ struct AppColors {
 
     // Backgrounds
     static let background = Color(hex: "1C1C1E")
+    static let sidebarBackground = Color(hex: "141416")
     static let backgroundSecondary = Color(hex: "2C2C2E")
     static let surface = Color.white.opacity(0.06)
     static let surfaceHover = Color.white.opacity(0.10)
@@ -30,8 +31,9 @@ struct AppColors {
 
     // Text
     static let textPrimary = Color.white
-    static let textSecondary = Color.white.opacity(0.6)
-    static let textTertiary = Color.white.opacity(0.4)
+    // Secondary and tertiary raised from 0.6 and 0.4: labels and hints were hard to read on the dark surfaces.
+    static let textSecondary = Color.white.opacity(0.75)
+    static let textTertiary = Color.white.opacity(0.55)
 
     // Semantic
     static let success = Color(hex: "34C759")
@@ -48,8 +50,8 @@ struct AppTypography {
     static let headline = Font.system(size: 15, weight: .semibold, design: .default)
     static let body = Font.system(size: 13, weight: .regular, design: .default)
     static let bodyMedium = Font.system(size: 13, weight: .medium, design: .default)
-    static let caption = Font.system(size: 11, weight: .regular, design: .default)
-    static let captionMedium = Font.system(size: 11, weight: .medium, design: .default)
+    static let caption = Font.system(size: 12, weight: .regular, design: .default)
+    static let captionMedium = Font.system(size: 12, weight: .medium, design: .default)
     static let timer = Font.system(size: 24, weight: .light, design: .monospaced)
     static let shortcutKey = Font.system(size: 32, weight: .medium, design: .rounded)
 }

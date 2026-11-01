@@ -289,6 +289,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
             defer: false
         )
         window.title = "SuperWhisper Settings"
+        // The settings are designed white-on-dark: pin dark so the title bar, sidebar and system controls match.
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.backgroundColor = NSColor(AppColors.background)
         window.contentView = NSHostingView(rootView: settingsView)
         window.center()
         window.setFrameAutosaveName("SettingsWindow")
