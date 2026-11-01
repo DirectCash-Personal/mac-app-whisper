@@ -745,8 +745,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
         appState?.transition(to: .error("Recording cancelled. Audio saved to History."))
         overlayPanel?.showOverlay()
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
-            self?.overlayPanel?.hideOverlay()
-            self?.appState?.transition(to: .idle)
+            // Only undo the cancel notice: a new take started in these 2.5 s must keep its overlay and its paste.
+            guard let self, let appState = self.appState, case .error = appState.currentState else { return }
+            self.overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
         }
     }
 
