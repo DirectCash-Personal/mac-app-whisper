@@ -22,6 +22,8 @@ class SettingsService: ObservableObject {
         static let customShortcutEnabled = "SW_CustomShortcutEnabled"
         static let launchAtLogin = "SW_LaunchAtLogin"
         static let apiKey = "SW_APIKey_Encoded"
+        static let vocabularyTerms = "SW_VocabularyTerms"
+        static let migratedToGptTranscribe = "SW_MigratedToGptTranscribe"
     }
 
     // MARK: - Published Properties
@@ -61,6 +63,13 @@ class SettingsService: ObservableObject {
         }
     }
 
+    /// Comma-separated terms sent as `keywords` (gpt-transcribe) or as the prompt hint (older models).
+    @Published var vocabularyTerms: String {
+        didSet { defaults.set(vocabularyTerms, forKey: Keys.vocabularyTerms) }
+    }
+
+    var vocabularyTermList: [String] { TranscriptionVocabulary.terms(from: vocabularyTerms) }
+
     var hotkeyKeyCode: UInt32 {
         get { UInt32(defaults.integer(forKey: Keys.hotkeyKeyCode)) }
         set { defaults.set(Int(newValue), forKey: Keys.hotkeyKeyCode) }
@@ -75,8 +84,19 @@ class SettingsService: ObservableObject {
 
     init() {
         // Load from UserDefaults or set defaults
-        let modelRaw = defaults.string(forKey: Keys.model) ?? TranscriptionModel.whisper1.rawValue
-        self.selectedModel = TranscriptionModel(rawValue: modelRaw) ?? .whisper1
+        // One-time move of the GPT-4o choice to gpt-transcribe (Jarvis Voz on mark2 since 19/10/2026: p50 493 ms
+        // against 739 ms, empty text on silent audio instead of the echo of the hint); GPT-4o stays as its fallback.
+        if !defaults.bool(forKey: Keys.migratedToGptTranscribe) {
+            if defaults.string(forKey: Keys.model) == TranscriptionModel.gpt4oTranscribe.rawValue {
+                defaults.set(TranscriptionModel.gptTranscribe.rawValue, forKey: Keys.model)
+            }
+            defaults.set(true, forKey: Keys.migratedToGptTranscribe)
+        }
+        let modelRaw = defaults.string(forKey: Keys.model) ?? TranscriptionModel.gptTranscribe.rawValue
+        self.selectedModel = TranscriptionModel(rawValue: modelRaw) ?? .gptTranscribe
+
+        self.vocabularyTerms = defaults.string(forKey: Keys.vocabularyTerms)
+            ?? TranscriptionVocabulary.defaultOperatorTerms.joined(separator: ", ")
 
         let langRaw = defaults.string(forKey: Keys.language) ?? TranscriptionLanguage.auto.rawValue
         self.selectedLanguage = TranscriptionLanguage(rawValue: langRaw) ?? .auto
@@ -162,8 +182,9 @@ class SettingsService: ObservableObject {
     // MARK: - Reset
 
     func resetToDefaults() {
-        selectedModel = .whisper1
+        selectedModel = .gptTranscribe
         selectedLanguage = .auto
+        vocabularyTerms = TranscriptionVocabulary.defaultOperatorTerms.joined(separator: ", ")
         autoPasteEnabled = true
         showNotification = true
         playSoundOnCompletion = true

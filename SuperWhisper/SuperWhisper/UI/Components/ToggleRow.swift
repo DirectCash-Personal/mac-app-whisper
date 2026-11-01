@@ -28,17 +28,11 @@ struct ToggleRow: View {
                     .frame(width: 20)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(AppTypography.bodyMedium)
-                    .foregroundColor(AppColors.textPrimary)
-
-                if let description = description {
-                    Text(description)
-                        .font(AppTypography.caption)
-                        .foregroundColor(AppColors.textTertiary)
-                }
-            }
+            // The description is a hover tip, not body text: the settings stay compact.
+            Text(title)
+                .font(AppTypography.bodyMedium)
+                .foregroundColor(AppColors.textPrimary)
+                .help(description ?? "")
 
             Spacer()
 

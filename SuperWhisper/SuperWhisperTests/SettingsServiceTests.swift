@@ -16,13 +16,15 @@ final class SettingsServiceTests: XCTestCase {
         defaults.removeObject(forKey: "SW_PlaySound")
         defaults.removeObject(forKey: "SW_HotkeyKeyCode")
         defaults.removeObject(forKey: "SW_HotkeyModifiers")
+        defaults.removeObject(forKey: "SW_VocabularyTerms")
+        defaults.removeObject(forKey: "SW_MigratedToGptTranscribe")
         service = SettingsService()
     }
 
     // MARK: - Default Values
 
     func testDefaultModel() {
-        XCTAssertEqual(service.selectedModel, .whisper1)
+        XCTAssertEqual(service.selectedModel, .gptTranscribe)
     }
 
     func testDefaultLanguage() {
@@ -74,7 +76,7 @@ final class SettingsServiceTests: XCTestCase {
 
         service.resetToDefaults()
 
-        XCTAssertEqual(service.selectedModel, .whisper1)
+        XCTAssertEqual(service.selectedModel, .gptTranscribe)
         XCTAssertEqual(service.selectedLanguage, .auto)
         XCTAssertTrue(service.autoPasteEnabled)
     }
@@ -105,5 +107,32 @@ final class SettingsServiceTests: XCTestCase {
         service.apiKey = nil
         XCTAssertNil(service.apiKey)
         XCTAssertFalse(service.hasAPIKey)
+    }
+
+    // MARK: - gpt-transcribe migration and vocabulary
+
+    func testGpt4oChoiceMovesToGptTranscribeOnce() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: "SW_MigratedToGptTranscribe")
+        defaults.set("gpt-4o-transcribe", forKey: "SW_SelectedModel")
+        XCTAssertEqual(SettingsService().selectedModel, .gptTranscribe)
+
+        // After the migration, choosing GPT-4o again is respected.
+        defaults.set("gpt-4o-transcribe", forKey: "SW_SelectedModel")
+        XCTAssertEqual(SettingsService().selectedModel, .gpt4oTranscribe)
+    }
+
+    func testDefaultVocabularyHasOperatorTerms() {
+        let terms = service.vocabularyTermList
+        for expectedTerm in ["Kestra", "NC Caps", "Jev", "CTO", "CEO", "DirectAds", "mark2"] {
+            XCTAssertTrue(terms.contains(expectedTerm), expectedTerm)
+        }
+    }
+
+    func testVocabularyTermsAreTrimmedAndPersisted() {
+        service.vocabularyTerms = " Kestra ,, NC Caps , "
+        XCTAssertEqual(SettingsService().vocabularyTermList, ["Kestra", "NC Caps"])
+        service.vocabularyTerms = "Kestra\nJev, NC Caps"
+        XCTAssertEqual(service.vocabularyTermList, ["Kestra", "Jev", "NC Caps"])
     }
 }
