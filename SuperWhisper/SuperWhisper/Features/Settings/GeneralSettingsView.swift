@@ -5,7 +5,8 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @EnvironmentObject var settingsService: SettingsService
     @EnvironmentObject var microphoneGuardService: MicrophoneGuardService
-    @StateObject private var updateService = UpdateService()
+    // The running updater (AppDelegate's): a second, never-started instance made "Check Now" do nothing.
+    @EnvironmentObject var updateService: UpdateService
     @State private var apiKeyInput: String = ""
     @State private var isTestingKey: Bool = false
     @State private var keyTestResult: KeyTestResult?
@@ -242,6 +243,24 @@ struct GeneralSettingsView: View {
                             Toggle("", isOn: Binding(
                                 get: { updateService.automaticallyChecksForUpdates },
                                 set: { updateService.automaticallyChecksForUpdates = $0 }
+                            ))
+                            .toggleStyle(.switch)
+                            .tint(AppColors.accent)
+                        }
+
+                        Divider().opacity(0.2)
+
+                        HStack {
+                            Text("Install updates automatically")
+                                .font(AppTypography.bodyMedium)
+                                .foregroundColor(AppColors.textPrimary)
+                                .help("Downloads in the background and installs by itself when no dictation is running; the app reopens in a second")
+
+                            Spacer()
+
+                            Toggle("", isOn: Binding(
+                                get: { updateService.automaticallyDownloadsUpdates },
+                                set: { updateService.automaticallyDownloadsUpdates = $0 }
                             ))
                             .toggleStyle(.switch)
                             .tint(AppColors.accent)
