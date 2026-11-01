@@ -16,6 +16,13 @@ final class UpdateService: NSObject, ObservableObject {
         set { updaterController.updater.automaticallyChecksForUpdates = newValue }
     }
 
+    /// Whether updates are downloaded in the background and installed silently when the app quits
+    /// (Mac restart, logout or Quit). Default on via SUAutomaticallyUpdate in Info.plist.
+    var automaticallyDownloadsUpdates: Bool {
+        get { updaterController.updater.automaticallyDownloadsUpdates }
+        set { updaterController.updater.automaticallyDownloadsUpdates = newValue }
+    }
+
     override init() {
         // Initialize with startingUpdater: false so we can start it manually
         // after the app finishes launching

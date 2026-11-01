@@ -250,6 +250,24 @@ struct GeneralSettingsView: View {
                         Divider().opacity(0.2)
 
                         HStack {
+                            Text("Install updates automatically")
+                                .font(AppTypography.bodyMedium)
+                                .foregroundColor(AppColors.textPrimary)
+                                .help("Downloads in the background and installs when the app quits or the Mac restarts, without asking")
+
+                            Spacer()
+
+                            Toggle("", isOn: Binding(
+                                get: { updateService.automaticallyDownloadsUpdates },
+                                set: { updateService.automaticallyDownloadsUpdates = $0 }
+                            ))
+                            .toggleStyle(.switch)
+                            .tint(AppColors.accent)
+                        }
+
+                        Divider().opacity(0.2)
+
+                        HStack {
                             VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                 Text("Current version: \(UpdateService.currentVersion)")
                                     .font(AppTypography.bodyMedium)
