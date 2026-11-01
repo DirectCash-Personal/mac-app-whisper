@@ -5,7 +5,8 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @EnvironmentObject var settingsService: SettingsService
     @EnvironmentObject var microphoneGuardService: MicrophoneGuardService
-    @StateObject private var updateService = UpdateService()
+    // The running updater (AppDelegate's): a second, never-started instance made "Check Now" do nothing.
+    @EnvironmentObject var updateService: UpdateService
     @State private var apiKeyInput: String = ""
     @State private var isTestingKey: Bool = false
     @State private var keyTestResult: KeyTestResult?
@@ -253,7 +254,7 @@ struct GeneralSettingsView: View {
                             Text("Install updates automatically")
                                 .font(AppTypography.bodyMedium)
                                 .foregroundColor(AppColors.textPrimary)
-                                .help("Downloads in the background and installs when the app quits or the Mac restarts, without asking")
+                                .help("Downloads in the background and installs by itself when no dictation is running; the app reopens in a second")
 
                             Spacer()
 
