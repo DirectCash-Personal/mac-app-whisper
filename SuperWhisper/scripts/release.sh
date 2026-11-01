@@ -83,24 +83,55 @@ if [ ! -d "$APP_PATH" ]; then
     exit 1
 fi
 
-# Sign with SuperWhisper Developer certificate + entitlements
-echo -e "   ${YELLOW}🔐 Signing with certificate...${NC}"
+# ─── Signing: Developer ID Application, inside-out, hardened runtime, secure timestamp ───
+# Gatekeeper only opens a downloaded (quarantined) app signed with Developer ID AND notarized; Apple Development
+# makes macOS refuse every DMG downloaded from the browser. Sparkle's helpers are signed one by one (no --deep).
+echo -e "   ${YELLOW}🔐 Signing with Developer ID Application...${NC}"
 xattr -rc "$APP_PATH" 2>/dev/null
-# A stable identity keeps Microphone and Accessibility permissions across updates (ad-hoc signing ties them to the binary hash).
-CERT_SHA=$(security find-identity -v -p codesigning | grep "SuperWhisper Developer" | head -1 | awk '{print $2}' || true)
-if [ -z "$CERT_SHA" ]; then
-    CERT_SHA=$(security find-identity -v -p codesigning | grep "Apple Development" | head -1 | awk '{print $2}' || true)
-fi
-if [ -z "$CERT_SHA" ]; then
-    echo -e "${RED}❌ No signing certificate found ('SuperWhisper Developer' or 'Apple Development'). Run scripts/setup-signing.sh first.${NC}"
+DEVELOPER_ID_IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | awk '{print $2}' || true)
+if [ -z "$DEVELOPER_ID_IDENTITY" ]; then
+    echo -e "${RED}❌ 'Developer ID Application' certificate not found in the Keychain (only the Account Holder can create it).${NC}"
     exit 1
 fi
-codesign --force --deep --sign "$CERT_SHA" \
-    --entitlements "$PROJECT_DIR/SuperWhisper/SuperWhisper.entitlements" \
-    --options runtime \
-    "$APP_PATH" 2>&1
+SPARKLE_FRAMEWORK="$APP_PATH/Contents/Frameworks/Sparkle.framework"
+SPARKLE_VERSION_DIR="$SPARKLE_FRAMEWORK/Versions/B"
+sign_with_developer_id() {
+    codesign --force --timestamp --options runtime --sign "$DEVELOPER_ID_IDENTITY" "$@"
+}
+sign_with_developer_id "$SPARKLE_VERSION_DIR/XPCServices/Installer.xpc"
+sign_with_developer_id --preserve-metadata=entitlements "$SPARKLE_VERSION_DIR/XPCServices/Downloader.xpc"
+sign_with_developer_id "$SPARKLE_VERSION_DIR/Autoupdate"
+sign_with_developer_id "$SPARKLE_VERSION_DIR/Updater.app"
+sign_with_developer_id "$SPARKLE_FRAMEWORK"
+sign_with_developer_id --entitlements "$PROJECT_DIR/SuperWhisper/SuperWhisper.entitlements" "$APP_PATH"
+codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+echo -e "   ${GREEN}✅ Signed with Developer ID${NC}"
 
-echo -e "   ${GREEN}✅ Build signed with SuperWhisper Developer certificate!${NC}"
+# ─── Notarization of the app, then staple it (works offline after install) ───
+# Credential: App Store Connect API key (~/.config/superwhisper/credencial-app-store-connect: ASC_ID_DA_CHAVE,
+# ASC_ID_DO_EMISSOR, ASC_CAMINHO_DA_CHAVE_P8).
+NOTARY_CREDENTIAL_FILE="$HOME/.config/superwhisper/credencial-app-store-connect"
+if [ ! -f "$NOTARY_CREDENTIAL_FILE" ]; then
+    echo -e "${RED}❌ Notarization credential not found: $NOTARY_CREDENTIAL_FILE${NC}"
+    exit 1
+fi
+# shellcheck disable=SC1090
+. "$NOTARY_CREDENTIAL_FILE"
+notarize_and_wait() {
+    xcrun notarytool submit "$1" --key "$ASC_CAMINHO_DA_CHAVE_P8" --key-id "$ASC_ID_DA_CHAVE" \
+        --issuer "$ASC_ID_DO_EMISSOR" --wait --output-format json > "$BUILD_DIR/notarizacao-$(basename "$1").json"
+    if ! grep -q '"status" *: *"Accepted"' "$BUILD_DIR/notarizacao-$(basename "$1").json"; then
+        echo -e "${RED}❌ Notarization rejected for $(basename "$1"): see $BUILD_DIR/notarizacao-$(basename "$1").json and 'xcrun notarytool log'${NC}"
+        exit 1
+    fi
+}
+echo -e "   ${YELLOW}📮 Notarizing the app...${NC}"
+APP_ZIP_FOR_NOTARIZATION="$BUILD_DIR/${APP_NAME}-notarizacao.zip"
+ditto -c -k --keepParent "$APP_PATH" "$APP_ZIP_FOR_NOTARIZATION"
+notarize_and_wait "$APP_ZIP_FOR_NOTARIZATION"
+xcrun stapler staple "$APP_PATH"
+rm -f "$APP_ZIP_FOR_NOTARIZATION"
+echo -e "   ${GREEN}✅ App notarized and stapled${NC}"
 
 # ─── Step 3: Create DMG ───────────────────────────────────────
 echo -e "\n${YELLOW}📦 Step 3: Creating DMG...${NC}"
@@ -130,6 +161,17 @@ if [ ! -f "$DMG_PATH" ]; then
     echo -e "${RED}❌ DMG creation failed${NC}"
     exit 1
 fi
+
+# The DMG itself is signed, notarized and stapled too; the appcast signature (Step 4) is generated only after the
+# staple, because stapling changes the file and an earlier edSignature would make Sparkle refuse the update.
+codesign --force --timestamp --sign "$DEVELOPER_ID_IDENTITY" "$DMG_PATH"
+echo -e "   ${YELLOW}📮 Notarizing the DMG...${NC}"
+notarize_and_wait "$DMG_PATH"
+xcrun stapler staple "$DMG_PATH"
+xcrun stapler validate "$DMG_PATH"
+spctl -a -vvv -t open --context context:primary-signature "$DMG_PATH"
+spctl -a -vvv -t exec "$APP_PATH"
+echo -e "   ${GREEN}✅ DMG signed, notarized and stapled${NC}"
 
 DMG_SIZE=$(du -h "$DMG_PATH" | cut -f1 | xargs)
 echo -e "   ${GREEN}✅ DMG created: ${DMG_NAME} (${DMG_SIZE})${NC}"
