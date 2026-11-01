@@ -40,6 +40,15 @@ final class TranscriptionTermCorrectionTests: XCTestCase {
         XCTAssertEqual(corrected("a assinatura do Cloud venceu"), "a assinatura do Claude venceu")
     }
 
+    func testNothingCapturedIsNotSpokenContent() {
+        XCTAssertFalse(TranscriptionService.hasSpokenContent(""))
+        XCTAssertFalse(TranscriptionService.hasSpokenContent("  \n "))
+        XCTAssertFalse(TranscriptionService.hasSpokenContent("."))
+        XCTAssertFalse(TranscriptionService.hasSpokenContent("…"))
+        XCTAssertTrue(TranscriptionService.hasSpokenContent("Sim."))
+        XCTAssertTrue(TranscriptionService.hasSpokenContent("1209"))
+    }
+
     func testHintEchoDetection() {
         XCTAssertTrue(TranscriptionService.looksLikeHintEcho("Termos comuns: Jarvis, Kestra."))
         XCTAssertTrue(TranscriptionService.looksLikeHintEcho("context: ###"))

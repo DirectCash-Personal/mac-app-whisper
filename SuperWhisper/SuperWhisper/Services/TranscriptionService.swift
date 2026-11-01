@@ -96,6 +96,11 @@ class TranscriptionService {
         return try await executeTranscription(audioFileURL: audioFileURL, apiKey: apiKey, model: model, vocabularyTerms: [])
     }
 
+    /// Nothing was captured: empty, or only spaces and punctuation ("." or "…" for a silent take).
+    static func hasSpokenContent(_ text: String) -> Bool {
+        text.unicodeScalars.contains { CharacterSet.letters.union(.decimalDigits).contains($0) }
+    }
+
     static func looksLikeHintEcho(_ text: String) -> Bool {
         text.range(of: #"(?i)\btermos comuns\s*:|\bcommon terms\s*:|\bcontext\s*:"#, options: .regularExpression) != nil
     }

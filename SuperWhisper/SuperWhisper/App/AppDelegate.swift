@@ -492,7 +492,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
                     appState.retryInfo = nil
 
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         self.historyService?.addEntry(
                             text: trimmed,
                             model: model,
@@ -584,7 +584,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
                 }
 
                 await MainActor.run {
-                    if !trimmed.isEmpty {
+                    if TranscriptionService.hasSpokenContent(trimmed) {
                         let model = self.settingsService?.selectedModel.rawValue ?? entry.model
                         let language = self.settingsService?.selectedLanguage.rawValue ?? entry.language
                         // H4: Only remove if entry still exists (prevents duplicate on race)
@@ -660,7 +660,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
             let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
             await MainActor.run {
-                if !trimmed.isEmpty {
+                if TranscriptionService.hasSpokenContent(trimmed) {
                     // C2: Pass audioFilename so entry has play/retranscribe
                     self.historyService?.addEntry(
                         text: trimmed,
@@ -686,9 +686,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
               let pasteService = pasteService,
               let settingsService = settingsService else { return }
 
-        // A silent take comes back empty: pasting it would wipe the clipboard and send Cmd+V for nothing,
+        // A silent take comes back empty (or only punctuation): pasting it would wipe the clipboard and send Cmd+V for nothing,
         // and the success state would claim a paste that never happened. Just close the overlay.
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        guard TranscriptionService.hasSpokenContent(text) else {
             overlayPanel?.hideOverlay()
             appState.transition(to: .idle)
             return
