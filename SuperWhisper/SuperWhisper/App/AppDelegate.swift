@@ -679,9 +679,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDele
               let pasteService = pasteService,
               let settingsService = settingsService else { return }
 
-        // Silence or a cancelled take comes back empty: pasting it would wipe the clipboard and send Cmd+V for nothing.
-        let hasTextToPaste = !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        if settingsService.autoPasteEnabled && hasTextToPaste {
+        // A silent take comes back empty: pasting it would wipe the clipboard and send Cmd+V for nothing,
+        // and the success state would claim a paste that never happened. Just close the overlay.
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            overlayPanel?.hideOverlay()
+            appState.transition(to: .idle)
+            return
+        }
+
+        if settingsService.autoPasteEnabled {
             overlayPanel?.hideOverlay()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
